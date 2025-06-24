@@ -1,10 +1,6 @@
 <h1> Asset Optimization using Sharpe ratio</h1>
 
-welcome to my asset optimization using sharpe ratio. To begin, please ```cd``` to the path shown below:
-
-```/fastapi_backend```
-
-and create a virtual environment and start this venv as shown below: 
+welcome to my asset optimization using sharpe ratio. To begin, please ```cd fastapi_backend``` and create a virtual environment and start this venv as shown below: 
 
 ```
 >> python -m venv venv
