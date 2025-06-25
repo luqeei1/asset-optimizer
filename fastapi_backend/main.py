@@ -5,6 +5,7 @@ import numpy as np
 from scipy.optimize import minimize
 import pandas as pd
 from typing import List
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
