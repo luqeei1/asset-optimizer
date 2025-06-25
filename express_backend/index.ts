@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import PortfolioModel from './models/PortfolioModel';
+import axios from 'axios';
+import RequestBody from './types/RequestBody';
+
 
 
 const app = express();
@@ -15,13 +18,15 @@ app.use(express.json());
 const url : string = process.env.MONGO_URL  || " ";
 
 app.post('/optimize', async (req: Request, res: Response): Promise<void> => {
-    const { assets, risk, constraints, window } = req.body;
+    const { assets , risk, constraints, window } = req.body;
 
     if (!assets || risk === undefined || !constraints || window === undefined) {
         res.status(400).json({ error: 'Invalid portfolio data' });
     }
 
     try {
+        const Fastapiurl = 'http://localhost:8000/optimize';
+        
         const newPortfolio = new PortfolioModel({
             assets,
             risk,
@@ -29,13 +34,11 @@ app.post('/optimize', async (req: Request, res: Response): Promise<void> => {
             window
         });
         
-        await newPortfolio.save();
-        res.status(201).json({ 
-            message: 'Portfolio saved successfully',
-            portfolio: newPortfolio
-        });
-    } catch (error) {
-        console.error('Error saving portfolio:', error);
+
+        const response = await axios.post(Fastapiurl, newPortfolio);
+        res.status(200).json(response.data);
+    }
+    catch (error) {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -49,6 +52,7 @@ app.get('/portfolio/list', async (req,res) => {
     }
 
 }); 
+
 
 app.get('/portfolio/:id', (req,res) => {
     const portfolioId = req.params.id;
@@ -73,7 +77,7 @@ mongoose
     .connect(url)
     .then(() => {
         app.listen(5000, () => {
-            console.log('server is running on port 5000'); 
+            console.log('server is running on port 5000 (the backend has restarted)'); 
         });
     })
     .catch((err) => {
