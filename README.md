@@ -19,3 +19,8 @@ and run the FastAPI backend by running:
 >> uvicorn main:app --reload
 ```
 
+You can run the frontend by entering the folder 'frontend' via running ```cd frontend``` and then running: 
+
+```
+npm run dev
+```
