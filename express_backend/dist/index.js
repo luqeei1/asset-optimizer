@@ -21,16 +21,16 @@ app.post('/optimize', async (req, res) => {
     }
     try {
         const Fastapiurl = 'http://localhost:8000/optimize';
-        const newPortfolio = new PortfolioModel_1.default({
+        const response = await axios_1.default.post(Fastapiurl, {
             assets,
             risk,
             constraints,
             window
         });
-        const response = await axios_1.default.post(Fastapiurl, newPortfolio);
         res.status(200).json(response.data);
     }
     catch (error) {
+        console.error('Axios/FastAPI error:', error.response?.data || error.message);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
