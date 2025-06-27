@@ -6,9 +6,13 @@ from scipy.optimize import minimize
 import pandas as pd
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+import requests
 
 
 app = FastAPI()
+
+class CompanyName(BaseModel):
+    name : str
 
 class Constraints(BaseModel):
     maxWeightedRisk: float
@@ -61,6 +65,22 @@ def optimize_port(portfolio: Portfolio):
     }
 
     return final
+
+@app.post("/find")
+def find_name(name : CompanyName):
+    find = name.name
+    url =  f"https://query1.finance.yahoo.com/v1/finance/search?q={find}"
+    headers = { "User-Agent": "Mozilla/5.0" }
+
+    response = requests.get(url, headers=headers)
+    data = response.json()
+
+    if data:
+        return data['quotes'][0]['symbol']
+    else:
+        raise HTTPException(status_code=404, detail="Stock not found")
+
+    return 'not found'
 
 
 
