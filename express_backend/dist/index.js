@@ -34,6 +34,23 @@ app.post('/optimize', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+app.post('/find', async (req, res) => {
+    const { name } = req.body;
+    if (!name) {
+        res.status(400).json({ error: 'invalid name' });
+    }
+    try {
+        const url = 'http://localhost:8000/find';
+        const response = await axios_1.default.post(url, {
+            name
+        });
+        res.status(200).json(response.data);
+    }
+    catch (error) {
+        console.error('Axios/FastAPI error:', error.response?.data || error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 app.get('/portfolio/list', async (req, res) => {
     try {
         const portfolios = await PortfolioModel_1.default.find({});

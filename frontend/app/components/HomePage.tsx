@@ -49,7 +49,7 @@ const HomePage = () => {
         initial={{ opacity:0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 2}}
-        onClick={() => router.push('/')}
+        onClick={() => router.push('/Start')}
         className="w-30 mt-16 px-8 py-3 bg-red-600 text-white rounded-lg shadow-lg hover:bg-red-700 hover:shadow-xl hover:scale-105"
     >
         Enter
