@@ -36,18 +36,22 @@ app.post('/optimize', async (req, res) => {
 });
 app.post('/find', async (req, res) => {
     const { name } = req.body;
+    console.log(' Received from frontend:', req.body);
     if (!name) {
-        res.status(400).json({ error: 'invalid name' });
+        res.status(400).json({ error: 'Invalid name' });
     }
     try {
         const url = 'http://localhost:8000/find';
-        const response = await axios_1.default.post(url, {
-            name
-        });
+        const fastapiPayload = { name };
+        console.log('Sending to FastAPI:', fastapiPayload);
+        const response = await axios_1.default.post(url, fastapiPayload);
+        console.log('FastAPI response:', response.data);
         res.status(200).json(response.data);
     }
     catch (error) {
-        console.error('Axios/FastAPI error:', error.response?.data || error.message);
+        console.error(' Axios error message:', error.message);
+        console.error(' Axios error data:', error.response?.data);
+        console.error('Axios status code:', error.response?.status);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
