@@ -1,92 +1,148 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 import yfinance as yf
 import numpy as np
 from scipy.optimize import minimize
-import pandas as pd
-from typing import List
-from fastapi.middleware.cors import CORSMiddleware
+from typing import List, Optional
 import requests
-
+import time
+from datetime import datetime
 
 app = FastAPI()
 
+class HistoricalData(BaseModel):
+    symbol: str
+    start: str  # 'YYYY-MM-DD' format
+    end: str    # 'YYYY-MM-DD' format
+
 class CompanyName(BaseModel):
-    name : str
+    name: str
 
-class Constraints(BaseModel):
-    maxWeightedRisk: float
-    minWeightedRisk: float
-    summedWeights: float
+class PortfolioConstraints(BaseModel):
+    max_weighted_risk: float = 0.01 
+    min_weighted_risk: float = 0     
+    summed_weights: float = 1        
 
-class Portfolio(BaseModel):
-    assets : List[str]
-    risk : float
-    constraints: Constraints
-    window : int 
-
+class PortfolioInput(BaseModel):
+    assets: List[str]
+    window_size: int = 1000          
+    risk_value: float = 0           
+    constraints: PortfolioConstraints
 
 @app.post("/optimize")
-def optimize_port(portfolio: Portfolio):
-    data = yf.download(portfolio.assets, period=f"{portfolio.window}d", auto_adjust=False)["Adj Close"]
-
+def optimize_portfolio(
+    portfolio: PortfolioInput,
+    maximize_return: Optional[bool] = Query(False, description="Maximize return instead of Sharpe ratio")
+):
+   
+    data = yf.download(portfolio.assets, period=f"{portfolio.window_size}d")["Close"]
     if data.empty:
-        raise HTTPException(status_code=400, detail="incorrect data provided")
-    
+        raise HTTPException(status_code=400, detail="Incorrect data provided")
 
+    
     returns = data.pct_change().dropna()
     cov_matrix = returns.cov()
     mean_returns = returns.mean()
 
-    def negative_sharpe(weights, mean_returns, cov_matrix):
-        portfolio_return = np.dot(weights, mean_returns)
-        portfolio_risk = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
-        return -portfolio_return / portfolio_risk
-                                 
-    initial_weights = np.array([1/len(portfolio.assets)] * len(portfolio.assets))
-    bounds = tuple((0,1) for i in range(len(portfolio.assets)))
-    constraints = {"type": "eq", "fun": lambda w: np.sum(w) - portfolio.constraints.summedWeights}
+   
+    def negative_sharpe(weights):
+        port_return = np.dot(weights, mean_returns)
+        port_risk = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights)))
+        return -port_return / port_risk if port_risk != 0 else 1e6
 
-    result = minimize(negative_sharpe, initial_weights, method="SLSQP", args= (mean_returns, cov_matrix), bounds=bounds, constraints=constraints)
-    if not result.success: # minimize function gives us an object back so im only taking the success part of the object
-        raise HTTPException(status_code=400, detail="The optimization failed")
+    def negative_return(weights):
+        return -np.dot(weights, mean_returns)
+
     
-    optimal_weights = result.x #x is the optimal weights of the result object so just using that too
+    constraints = [
+        {"type": "eq", "fun": lambda w: np.sum(w) - portfolio.constraints.summed_weights},
+    ]
 
-    final_risk = np.sqrt(np.dot(optimal_weights.T, np.dot(cov_matrix, optimal_weights)))
+   
+    def max_risk_constraint(weights):
+        marginal_risk = weights * (cov_matrix @ weights)
+        total_risk = np.sqrt(weights.T @ cov_matrix @ weights)
+        risk_contributions = marginal_risk / total_risk if total_risk != 0 else np.zeros_like(weights)
+        return portfolio.constraints.max_weighted_risk - risk_contributions
+
+    def min_risk_constraint(weights):
+        marginal_risk = weights * (cov_matrix @ weights)
+        total_risk = np.sqrt(weights.T @ cov_matrix @ weights)
+        risk_contributions = marginal_risk / total_risk if total_risk != 0 else np.zeros_like(weights)
+        return risk_contributions - portfolio.constraints.min_weighted_risk
+
+    constraints.extend([
+        {"type": "ineq", "fun": max_risk_constraint},
+        {"type": "ineq", "fun": min_risk_constraint}
+    ])
+
+    
+    bounds = tuple((0, 1) for _ in portfolio.assets)
+
+   
+    initial_weights = np.ones(len(portfolio.assets)) / len(portfolio.assets)
+
+    
+    result = minimize(
+        negative_return if maximize_return else negative_sharpe,
+        initial_weights,
+        method="SLSQP",
+        bounds=bounds,
+        constraints=constraints,
+    )
+
+    if not result.success:
+        raise HTTPException(status_code=400, detail=f"Optimization failed: {result.message}")
+
+   
+    optimal_weights = result.x
     final_return = np.dot(optimal_weights, mean_returns)
-    final_sharpe = final_return / final_risk
+    final_risk = np.sqrt(optimal_weights.T @ cov_matrix @ optimal_weights)
+    sharpe_ratio = final_return / final_risk if final_risk != 0 else 0
 
-    final = {
-        "weights" : optimal_weights.tolist(),
-        "final risk": final_risk,
-        "final return" : final_return,
-        "final sharpe score" : final_sharpe
+    trading_days = 252  # Annualize Sharpe assuming 252 trading days
+    annualized_sharpe = sharpe_ratio * np.sqrt(trading_days)
+
+    print(f"Optimal Weights: {optimal_weights}")
+    print(f"Final Return: {final_return}")
+    print(f"Final Risk: {final_risk}")
+    print(f"Daily Sharpe Ratio: {sharpe_ratio}")
+    print(f"Annualized Sharpe Ratio: {annualized_sharpe}")
+
+   
+    marginal_risk = optimal_weights * (cov_matrix @ optimal_weights)
+    risk_contributions = marginal_risk / final_risk if final_risk != 0 else np.zeros_like(optimal_weights)
+
+    return {
+        "weights": optimal_weights.tolist(),
+        "final_return": final_return,
+        "final_risk": final_risk,
+        "final_sharpe_score": annualized_sharpe,
     }
 
-    return final
-
 @app.post("/find")
-def find_name(name : CompanyName):
-    find = name.name
-    url =  f"https://query1.finance.yahoo.com/v1/finance/search?q={find}"
-    headers = { "User-Agent": "Mozilla/5.0" }
-
+def find_name(name: CompanyName):
+    url = f"https://query1.finance.yahoo.com/v1/finance/search?q={name.name}"
+    headers = {"User-Agent": "Mozilla/5.0"}
     response = requests.get(url, headers=headers)
     data = response.json()
-
-    if data:
+    if data and data.get('quotes'):
         return data['quotes'][0]['symbol']
-    else:
-        raise HTTPException(status_code=404, detail="Stock not found")
+    raise HTTPException(status_code=404, detail="Stock not found")
 
-    return 'not found'
+def to_unix_timestamp(date_str: str) -> int:
+    dt = datetime.strptime(date_str, "%Y-%m-%d")
+    return int(time.mktime(dt.timetuple()))
 
+@app.post("/historical")
+def get_historical_data(data: HistoricalData):
+    start_ts = to_unix_timestamp(data.start)
+    end_ts = to_unix_timestamp(data.end)
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{data.symbol}?period1={start_ts}&period2={end_ts}&interval=1d"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(url, headers=headers)
+    json_data = response.json()
+    if json_data and json_data.get('chart'):
+        return json_data['chart']['result'][0]
+    raise HTTPException(status_code=404, detail="Historical data not found")
 
-
-
-
-    
-    
-
-    
