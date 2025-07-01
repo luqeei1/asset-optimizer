@@ -81,6 +81,36 @@ app.get('/portfolio/list', async (req,res) => {
 
 }); 
 
+app.post('/historical', async (req: Request, res: Response): Promise<void> => {
+    const { symbol, start, end } = req.body;
+
+    if (!symbol || !start || !end) {
+        res.status(400).json({ error: 'Invalid request data' });
+        return;
+    }
+
+    try {
+        const url = `http://localhost:8000/historical`;
+
+        
+        const response = await axios.post(
+            url,
+            { symbol, start, end },
+            { headers: { 'User-Agent': 'Mozilla/5.0' } }
+        );
+
+        if (response.data) {
+            res.status(200).json(response.data);
+        } else {
+            res.status(404).json({ error: 'Historical data not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching historical data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 
 app.get('/portfolio/:id', (req,res) => {
     const portfolioId = req.params.id;
@@ -105,7 +135,7 @@ mongoose
     .connect(url)
     .then(() => {
         app.listen(5000, () => {
-            console.log('server is running on port 5000 (the backend has restarted)'); 
+            console.log('server is running on port 5000 (the backend has done)'); 
         });
     })
     .catch((err) => {
