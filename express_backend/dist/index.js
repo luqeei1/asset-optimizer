@@ -65,15 +65,14 @@ app.get('/portfolio/list', async (req, res) => {
     }
 });
 app.post('/historical', async (req, res) => {
-    const { symbol, start, end } = req.body;
-    if (!symbol || !start || !end) {
+    const { symbol, start, end, step } = req.body;
+    if (!symbol || !start || !end || !step) {
         res.status(400).json({ error: 'Invalid request data' });
         return;
     }
     try {
         const url = `http://localhost:8000/historical`;
-        // Send the date strings as-is — no timestamp conversion
-        const response = await axios_1.default.post(url, { symbol, start, end }, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const response = await axios_1.default.post(url, { symbol, start, end, step }, { headers: { 'User-Agent': 'Mozilla/5.0' } });
         if (response.data) {
             res.status(200).json(response.data);
         }
@@ -82,7 +81,7 @@ app.post('/historical', async (req, res) => {
         }
     }
     catch (error) {
-        console.error('Error fetching historical data:', error);
+        console.log('Error fetching historical data:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

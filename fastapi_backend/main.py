@@ -7,13 +7,17 @@ from typing import List, Optional
 import requests
 import time
 from datetime import datetime
+from yfinance import Ticker
+
 
 app = FastAPI()
+
 
 class HistoricalData(BaseModel):
     symbol: str
     start: str  # 'YYYY-MM-DD' format
     end: str    # 'YYYY-MM-DD' format
+    step : str # what should the gap between the data points be?
 
 class CompanyName(BaseModel):
     name: str
@@ -136,13 +140,13 @@ def to_unix_timestamp(date_str: str) -> int:
 
 @app.post("/historical")
 def get_historical_data(data: HistoricalData):
-    start_ts = to_unix_timestamp(data.start)
-    end_ts = to_unix_timestamp(data.end)
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{data.symbol}?period1={start_ts}&period2={end_ts}&interval=1d"
-    headers = {"User-Agent": "Mozilla/5.0"}
-    response = requests.get(url, headers=headers)
-    json_data = response.json()
-    if json_data and json_data.get('chart'):
-        return json_data['chart']['result'][0]
-    raise HTTPException(status_code=404, detail="Historical data not found")
+    ticker = Ticker(data.symbol)
+    ticker_historical = ticker.history(start=data.start, end=data.end, interval=data.step)
 
+    if ticker_historical.empty:
+        raise HTTPException(status_code=404, detail="No historical data found for the given symbol and date range")
+
+    # Reset index to make date a column, then convert to dict
+    ticker_historical.reset_index(inplace=True)
+    print(ticker_historical)
+    return ticker_historical.to_dict(orient="records")
