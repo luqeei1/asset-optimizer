@@ -82,9 +82,9 @@ app.get('/portfolio/list', async (req,res) => {
 }); 
 
 app.post('/historical', async (req: Request, res: Response): Promise<void> => {
-    const { symbol, start, end } = req.body;
+    const { symbol, start, end, step } = req.body;
 
-    if (!symbol || !start || !end) {
+    if (!symbol || !start || !end || !step) {
         res.status(400).json({ error: 'Invalid request data' });
         return;
     }
@@ -95,7 +95,7 @@ app.post('/historical', async (req: Request, res: Response): Promise<void> => {
         
         const response = await axios.post(
             url,
-            { symbol, start, end },
+            { symbol, start, end, step},
             { headers: { 'User-Agent': 'Mozilla/5.0' } }
         );
 
@@ -105,10 +105,11 @@ app.post('/historical', async (req: Request, res: Response): Promise<void> => {
             res.status(404).json({ error: 'Historical data not found' });
         }
     } catch (error) {
-        console.error('Error fetching historical data:', error);
+        console.log('Error fetching historical data:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 
 
