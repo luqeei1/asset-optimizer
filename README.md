@@ -1,5 +1,8 @@
 <h1> Asset Optimization using Sharpe ratio</h1>
 
+PLEASE NOTE : this project is still under development.
+
+
 Welcome to my asset optimization using sharpe ratio. To begin, please ```cd fastapi_backend``` and create a virtual environment and start this venv as shown below: 
 
 ```
