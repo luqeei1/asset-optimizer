@@ -1,10 +1,4 @@
-/* 
 
-TODO : 
-
-Complete it so we only need to put names of the stocks and it will fetch the data for us.
-
-*/ 
 'use client'
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';

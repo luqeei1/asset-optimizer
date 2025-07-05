@@ -15,9 +15,9 @@ app = FastAPI()
 
 class HistoricalData(BaseModel):
     symbol: str
-    start: str  # 'YYYY-MM-DD' format
-    end: str    # 'YYYY-MM-DD' format
-    step : str # what should the gap between the data points be?
+    start: str  
+    end: str    
+    step : str 
 
 class CompanyName(BaseModel):
     name: str
@@ -104,7 +104,7 @@ def optimize_portfolio(
     final_risk = np.sqrt(optimal_weights.T @ cov_matrix @ optimal_weights)
     sharpe_ratio = final_return / final_risk if final_risk != 0 else 0
 
-    trading_days = 252  # Annualize Sharpe assuming 252 trading days
+    trading_days = 252 
     annualized_sharpe = sharpe_ratio * np.sqrt(trading_days)
 
     print(f"Optimal Weights: {optimal_weights}")
@@ -146,7 +146,6 @@ def get_historical_data(data: HistoricalData):
     if ticker_historical.empty:
         raise HTTPException(status_code=404, detail="No historical data found for the given symbol and date range")
 
-    # Reset index to make date a column, then convert to dict
     ticker_historical.reset_index(inplace=True)
     print(ticker_historical)
     return ticker_historical.to_dict(orient="records")
