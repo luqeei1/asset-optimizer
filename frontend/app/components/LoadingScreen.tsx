@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion' // fixed incorrect import path
+import { motion } from 'framer-motion'
 
 const LoadingScreen = () => {
   return (
