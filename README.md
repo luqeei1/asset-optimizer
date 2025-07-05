@@ -1,6 +1,6 @@
 <h1> Asset Optimization using Sharpe ratio</h1>
 
-welcome to my asset optimization using sharpe ratio. To begin, please ```cd fastapi_backend``` and create a virtual environment and start this venv as shown below: 
+Welcome to my asset optimization using sharpe ratio. To begin, please ```cd fastapi_backend``` and create a virtual environment and start this venv as shown below: 
 
 ```
 >> python -m venv venv
@@ -22,5 +22,7 @@ and run the FastAPI backend by running:
 You can run the frontend by entering the folder 'frontend' via running ```cd frontend``` and then running: 
 
 ```
-npm run dev
+>> npm run dev
 ```
+
+I am currently working on developing a 'Historical information' section so users can compare the performance of stocks within a defined window. 
