@@ -22,7 +22,7 @@ and run the FastAPI backend by running:
 You can run the frontend by entering the folder 'frontend' via running ```cd frontend``` and then running: 
 
 ```
-npm run dev
+>> npm run dev
 ```
 
 I am currently working on developing a 'Historical information' section so users can compare the performance of stocks within a defined window. 
