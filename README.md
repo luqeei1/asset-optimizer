@@ -25,4 +25,4 @@ You can run the frontend by entering the folder 'frontend' via running ```cd fro
 >> npm run dev
 ```
 
-I am currently working on developing a 'Historical information' section so users can compare the performance of stocks within a defined window. 
+Next Steps: I will add a way of displaying news for users to view
