@@ -13,6 +13,9 @@ const app = (0, express_1.default)();
 dotenv_1.default.config();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+let newsCache = null;
+let lastFetched = 0;
+const CACHE_TTL = 1000 * 60 * 10; // ive left this at 10 minutes, i think this seems ok but i can change this later? 
 const url = process.env.MONGO_URL || " ";
 app.post('/optimize', async (req, res) => {
     const { assets, risk, constraints, window } = req.body;
@@ -61,6 +64,31 @@ app.get('/portfolio/list', async (req, res) => {
         res.status(200).json(portfolios);
     }
     catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+app.get('/news', async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const start = (page - 1) * 10;
+    const end = page * 10;
+    try {
+        if (!newsCache || Date.now() - lastFetched > CACHE_TTL) {
+            const response = await axios_1.default.get('http://localhost:8000/news');
+            newsCache = response.data;
+            lastFetched = Date.now();
+        }
+        const newsdata = newsCache.slice(start, end);
+        res.status(200).json({
+            page,
+            total: newsCache.length,
+            results: newsdata,
+            lastUpdated: new Date(lastFetched).toISOString()
+        });
+    }
+    catch (error) {
+        console.error('Axios error message:', error.message);
+        console.error('Axios error data:', error.response?.data);
+        console.error('Axios status code:', error.response?.status);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

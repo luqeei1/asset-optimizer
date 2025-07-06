@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import PortfolioModel from './models/PortfolioModel';
 import axios from 'axios';
 import RequestBody from './types/RequestBody';
+import { parse } from 'path';
 
 
 
@@ -13,6 +14,10 @@ const app = express();
 dotenv.config(); 
 app.use(cors());
 app.use(express.json());
+
+let newsCache : any = null;
+let lastFetched : number = 0;
+const CACHE_TTL : number = 1000 * 60 * 10; // ive left this at 10 minutes, i think this seems ok but i can change this later? 
 
 
 const url : string = process.env.MONGO_URL  || " ";
@@ -80,6 +85,34 @@ app.get('/portfolio/list', async (req,res) => {
     }
 
 }); 
+
+app.get('/news', async (req: Request, res: Response): Promise<void> => {
+
+    const page = parseInt(req.query.page as string) || 1;
+    const start = (page - 1) * 10;
+    const end = page * 10;
+
+    try {
+        if(!newsCache || Date.now() - lastFetched > CACHE_TTL) {
+            const response = await axios.get('http://localhost:8000/news');
+            newsCache = response.data;
+            lastFetched = Date.now();
+        }
+        const newsdata = newsCache.slice(start, end);
+        res.status(200).json({
+        page,
+        total: newsCache.length,
+        results: newsdata,
+        lastUpdated: new Date(lastFetched).toISOString()
+        });
+    } catch (error: any) {
+        console.error('Axios error message:', error.message);
+        console.error('Axios error data:', error.response?.data);
+        console.error('Axios status code:', error.response?.status);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+});
 
 app.post('/historical', async (req: Request, res: Response): Promise<void> => {
     const { symbol, start, end, step } = req.body;
