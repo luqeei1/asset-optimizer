@@ -8,6 +8,18 @@ import requests
 import time
 from datetime import datetime
 from yfinance import Ticker
+import os 
+import dotenv 
+import datetime
+
+
+dotenv.load_dotenv()
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    raise ValueError("API_KEY is not set in the environment variables")
+else: 
+    print("API_KEY is set successfully")
+    
 
 
 app = FastAPI()
@@ -149,3 +161,14 @@ def get_historical_data(data: HistoricalData):
     ticker_historical.reset_index(inplace=True)
     print(ticker_historical)
     return ticker_historical.to_dict(orient="records")
+
+@app.get("/news")
+def get_news():
+    date = str(datetime.date.today())
+    url = f"https://api.marketaux.com/v1/news/all?filter_entities=true&language=en&published_after={date}T00:00&api_token={API_KEY}"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    response = requests.get(url, headers=headers)
+    data = response.json()
+    if data and data.get('data'):
+        return data['data']
+    raise HTTPException(status_code=404, detail="No news found")
