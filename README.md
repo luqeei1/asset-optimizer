@@ -13,7 +13,7 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Next.js + TypeScript  
+- **Frontend:** Next.js (TypeScript) + Tailwind CSS  
 - **Backend:** Express.js (TypeScript)  
 - **Microservice:** Python + FastAPI  
 - **Libraries:** `yfinance`, `numpy`, `scipy`, `pandas`, `fastapi`, `uvicorn`, `pydantic`,`Charts.js`
