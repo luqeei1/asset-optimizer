@@ -17,6 +17,7 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 The Sharpe Ratio optimization is a portfolio optimization technique where one has a portfolio of stocks and the fundamental question of "How much money should I allocate to each stock in my portfolio". The Sharpe Ratio optimization answers just this; it takes a set of stocks, a window (days to look within history, normally 252 trading days) and constraints on maximum weighted risk and minimum weighted risk. Firstly, we will define two key terms:
 
 Risk : How much does price fluctuate (measured by volatility which is the standard devitiation of return)
+
 Return : How much profit do we make? 
 
 The Sharpe Ratio itself is defined as ``` Expected Overall Return / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. 
