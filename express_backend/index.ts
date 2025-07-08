@@ -24,6 +24,7 @@ const url : string = process.env.MONGO_URL  || " ";
 
 app.post('/optimize', async (req: Request, res: Response): Promise<void> => {
     const { assets , risk, constraints, window } = req.body;
+    console.log('Received from frontend:', req.body);
 
     if (!assets || risk === undefined || !constraints || window === undefined) {
         res.status(400).json({ error: 'Invalid portfolio data' });

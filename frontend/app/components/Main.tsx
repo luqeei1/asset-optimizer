@@ -216,12 +216,6 @@ const Main = () => {
                     description: 'Time period for analysis (days)',
                   },
                   {
-                    label: 'Risk Value',
-                    value: risk,
-                    setter: setRisk,
-                    description: 'Target risk level',
-                  },
-                  {
                     label: 'Max Weighted Risk',
                     value: maxWeightedRisk,
                     setter: setMaxWeightedRisk,
