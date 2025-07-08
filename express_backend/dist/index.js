@@ -31,6 +31,7 @@ app.post('/optimize', async (req, res) => {
             window
         });
         res.status(200).json(response.data);
+        console.log('Response from FastAPI:', response.data);
     }
     catch (error) {
         console.error('Axios/FastAPI error:', error.response?.data || error.message);
