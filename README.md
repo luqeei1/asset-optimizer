@@ -7,9 +7,14 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 
 - 📰 A **news** section with financial updates  
 - ⏰ A **stock market opening/closing time comparator**  
-- 💼 A **portfolio optimizer** using the Sharpe ratio  
+- 💼 A **portfolio optimizer** using the Sharpe ratio
+
 
 ---
+
+### 💰 What is the Sharpe Ratio optimization? 
+
+The Sharpe Ratio optimization is a portfolio optimization technique where one has a portfolio of stocks and the fundamental question of "How much money do I put into each stock?". The Sharpe Ratio optimization answers just this; it takes a set of stocks, a window (days to look within history) and constraints on maximum weighted risk and minimum weighted risk. 
 
 ## 🛠️ Tech Stack
 
