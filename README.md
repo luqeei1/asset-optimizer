@@ -1,31 +1,51 @@
-<h1> Asset Optimization using Sharpe ratio</h1>
+# 📈 Asset Optimization Using Sharpe Ratio
 
-PLEASE NOTE : this project is still under development.
+🚧 **Note:** This project is still under development. Further UI improvements and minor functionality changes are to be expected in the near future. Historical portfolio managment will also be provided soon.  
 
+Welcome to my full-stack asset optimization application!  
+This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
 
-Welcome to my asset optimization using sharpe ratio. To begin, please ```cd fastapi_backend``` and create a virtual environment and start this venv as shown below: 
+- 📰 A **news** section with financial updates  
+- ⏰ A **stock market opening/closing time comparator**  
+- 💼 A **portfolio optimizer** using the Sharpe ratio  
 
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend:** Next.js (TypeScript) + Tailwind CSS  
+- **Backend:** Express.js (TypeScript)  
+- **Microservice:** Python + FastAPI  
+- **Libraries:** `yfinance`, `numpy`, `scipy`, `pandas`, `fastapi`, `uvicorn`, `pydantic`,`Charts.js`
+
+---
+
+## 🚀 Getting Started
+
+### 1. Start the FastAPI Backend
+
+```bash
+cd fastapi_backend
+python -m venv venv
+venv\Scripts\activate  # On Windows
+# Or use 'source venv/bin/activate' on Mac/Linux
+pip install fastapi uvicorn pydantic yfinance numpy scipy pandas
+uvicorn main:app --reload
 ```
->> python -m venv venv
->> venv\Scripts\activate
+
+### 2. Start the Express.js backend
+
+```bash
+cd express_backend
+npx tsc
+npm start
 ```
 
-Following this, make sure you have installed the required packages by running: 
+### 3. Start the Frontend
 
-```
->> pip install fastapi uvicorn pydantic yfinance numpy scipy pandas
-```
-
-and run the FastAPI backend by running: 
-
-```
->> uvicorn main:app --reload
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-You can run the frontend by entering the folder 'frontend' via running ```cd frontend``` and then running: 
-
-```
->> npm run dev
-```
-
-Next Steps: I will add a way of displaying news for users to view
