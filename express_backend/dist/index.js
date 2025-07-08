@@ -19,6 +19,7 @@ const CACHE_TTL = 1000 * 60 * 10; // ive left this at 10 minutes, i think this s
 const url = process.env.MONGO_URL || " ";
 app.post('/optimize', async (req, res) => {
     const { assets, risk, constraints, window } = req.body;
+    console.log('Received from frontend:', req.body);
     if (!assets || risk === undefined || !constraints || window === undefined) {
         res.status(400).json({ error: 'Invalid portfolio data' });
     }

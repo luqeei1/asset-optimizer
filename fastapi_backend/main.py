@@ -32,7 +32,6 @@ app = FastAPI()
 
 
 class PortfolioConstraints(BaseModel):
-    max_portfolio_risk: float = 0.25
     min_asset_weight: float = 0.05
     max_asset_weight: float = 0.75
 
