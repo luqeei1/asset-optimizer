@@ -149,3 +149,5 @@ async def get_market_news():
         return response.json()["data"]
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+

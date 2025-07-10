@@ -115,6 +115,22 @@ app.post('/historical', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+app.get('/market_snapshot', async (req, res) => {
+    try {
+        const url = 'http://localhost:8000/market_snapshot';
+        const response = await axios_1.default.get(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        if (response.data) {
+            res.status(200).json(response.data);
+        }
+        else {
+            res.status(404).json({ error: 'Market snapshot not found' });
+        }
+    }
+    catch (error) {
+        console.error('Error fetching market snapshot:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 app.get('/portfolio/:id', (req, res) => {
     const portfolioId = req.params.id;
     PortfolioModel_1.default.findById(portfolioId)
