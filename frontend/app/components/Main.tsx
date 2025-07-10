@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-
+import NavBar from './NavBar';
 interface Response {
   weights: number[];
   final_risk: number;
@@ -72,16 +72,21 @@ const Main = () => {
   return (
     <div className="min-h-screen bg-black text-white px-4 py-8 font-sans">
       <div className="max-w-7xl mx-auto">
-        
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div className="mb-4 md:mb-0">
+        <NavBar />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pt-10">
+          <motion.div
+            initial={{ opacity: 0, x : -100}}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+           
+          className="mb-4 md:mb-0">
             <h1 className="text-3xl md:text-4xl font-bold text-white">
               Portfolio <span className="text-red-500">Optimizer</span>
             </h1>
             <p className="text-gray-400 text-sm mt-1">
               Maximize returns with optimized asset allocation
             </p>
-          </div>
+          </motion.div>
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
@@ -108,7 +113,11 @@ const Main = () => {
           
           <div className="col-span-2 space-y-6">
             
-            <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <motion.div 
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-900 rounded-lg p-6 border border-gray-800">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-white">Add Asset</h2>
                 <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded">
@@ -202,10 +211,14 @@ const Main = () => {
                   </div>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             
-            <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
+            <motion.div 
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-gray-900 rounded-lg p-6 border border-gray-800">
               <h2 className="text-xl font-semibold text-white mb-4">Portfolio Parameters</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
@@ -264,11 +277,15 @@ const Main = () => {
                   Set Constraints
                 </motion.button>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           
-          <div className="space-y-6">
+          <motion.div 
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-6">
             <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
               <h2 className="text-xl font-semibold text-white mb-4">Portfolio Actions</h2>
               <div className="space-y-3">
@@ -444,7 +461,7 @@ const Main = () => {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

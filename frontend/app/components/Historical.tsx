@@ -1,10 +1,10 @@
-
 'use client'
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend} from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useRouter } from 'next/navigation';
+import NavBar from './NavBar';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -29,10 +29,12 @@ const Historical = () => {
   const [historicalData, setHistoricalData] = useState<StockData[]>([]);
   const [historicalData2, setHistoricalData2] = useState<StockData[]>([]);
   const [symbol2, setSymbol2] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
 
   const fetchHistoricalData = async (asset: { symbol: string; start: string; end: string; step: string }) => {
+    setIsLoading(true);
     const data = {
       symbol: asset.symbol,
       start: asset.start,
@@ -61,10 +63,13 @@ const Historical = () => {
       setHistoricalData(transformed);
     } catch (error) {
       console.error('Error fetching historical data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const fetchHistoricalData2 = async (asset: { symbol: string; start: string; end: string; step: string }) => {
+    setIsLoading(true);
     const data = {
       symbol: asset.symbol,
       start: asset.start,
@@ -92,6 +97,8 @@ const Historical = () => {
       setHistoricalData2(transformed);
     } catch (error) {
       console.error('Error fetching historical data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -179,6 +186,7 @@ const Historical = () => {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' as const },
       title: { display: true, text: `Historical closing prices`},
@@ -195,6 +203,7 @@ const Historical = () => {
 
   const chartOptions2 = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' as const },
       title: { display: true, text: `Historical opening prices`},
@@ -210,9 +219,10 @@ const Historical = () => {
   };
 
   const chartOptionsSwitch = {
-    responsive : true, 
-    plugins : {
-      legend: { position : 'top' as const },
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
       title: { display: true, text: `Historical prices` },
     },
     scales: {
@@ -226,147 +236,258 @@ const Historical = () => {
   }
 
   return (
-    <div>
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        onClick={() => router.push('/')}
-        className="bg-red-500 text-white p-2 rounded-md w-30 px-10 mt-4"
-      >
-        Return
-      </motion.button>
-
-      <div className="flex flex-col items-center justify-center mt-10 mb-10">
-        <h1 className="text-4xl underline decoration-red-500 font-extrabold"> Historical data </h1>
-      </div>
-      
-      <div className="flex flex-col md:flex-row gap-10 justify-between items-start w-full max-w-7xl px-4 mx-auto mt-10 mb-10">
-        <div className="flex flex-col items-start justify-start w-full md:w-[400px]">
-          <h2 className="text-xl font-bold underline decoration-red-500 mb-4">Add a stock to compare</h2>
-          <div className="space-y-4 w-full">
-            <div className="flex flex-row gap-4">
-              <input
-                value={symbol}
-                onChange={(e) => setSymbol(e.currentTarget.value)}
-                className="border border-gray-300 p-2 rounded-md w-full"
-                type="text"
-                placeholder="Enter symbol (e.g., AAPL)"
+    <div className="min-h-screen bg-black text-white px-4 py-8 font-sans">
+      <div className="max-w-7xl mx-auto">
+        <NavBar />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pt-10">
+          <motion.div
+            initial={{ opacity: 0, x: -100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-4 md:mb-0"
+          >
+            <h1 className="text-3xl md:text-4xl font-bold text-white">
+              Historical <span className="text-red-500">Data</span>
+            </h1>
+            <p className="text-gray-400 text-sm mt-1">
+              Compare stock performance over time
+            </p>
+          </motion.div>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                clipRule="evenodd"
               />
-              <input
-                value={symbol2}
-                onChange={(e) => setSymbol2(e.currentTarget.value)}
-                className="border border-gray-300 p-2 rounded-md w-full"
-                type="text"
-                placeholder="Enter symbol 2 (e.g., MSFT)"
-              />
-            </div>
-            <input
-              value={startDate}
-              onChange={(e) => setStartDate(e.currentTarget.value)}
-              className="border border-gray-300 p-2 rounded-md w-full"
-              type="date"
-              placeholder="Start date (YYYY-MM-DD)"
-            />
-            <input
-              value={endDate}
-              onChange={(e) => setEndDate(e.currentTarget.value)}
-              className="border border-gray-300 p-2 rounded-md w-full"
-              type="date"
-              placeholder="End date (YYYY-MM-DD)"
-            />
-            <input
-              value={step}
-              onChange={(e) => setStep(e.currentTarget.value)}
-              className="border border-gray-300 p-2 rounded-md w-full"
-              type="text"
-              placeholder="Step (e.g., 1d, 1mo)"
-            />
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={(e) => {
-                e.preventDefault();
-                if (!symbol || !symbol2 || !startDate || !endDate || !step) {
-                  alert('Please fill in all fields');
-                  return;
-                }
-                const newAsset = { symbol, start: startDate, end: endDate, step };
-                const newAsset2 = { symbol: symbol2, start: startDate, end: endDate, step };
-                setAssets((prev) => [...prev, newAsset, newAsset2]);
-              }}
-              className="bg-red-500 text-white p-2 rounded-md w-full"
-            >
-              Add stock to list to compare
-            </motion.button>
-          </div>
+            </svg>
+            Return
+          </motion.button>
         </div>
 
-        <div className="hidden md:flex flex-col justify-center px-6 max-w-sm text-white-700">
-          <h2 className="text-2xl font-bold mb-3 underline decoration-red-500">About This Section</h2>
-          <p className="mb-4">
-            Here, you compare historical stock data of two symbols side by side. This is done via fetching
-            daily open and close prices with flexible date ranges and intervals. Compare up to two stocks simultaneously, view detailed open and close price charts
-            and switch between different graph types for better insights.
-          </p>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Inputs */}
+          <div className="space-y-6">
+            {/* Stock Input Card */}
+            <motion.div 
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-gray-900 rounded-lg p-6 border border-gray-800"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white">Add Stocks</h2>
+                <span className="text-xs bg-gray-800 text-gray-300 px-2 py-1 rounded">
+                  {assets.length} {assets.length === 1 ? 'stock' : 'stocks'} selected
+                </span>
+              </div>
+              
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={symbol}
+                  onChange={(e) => setSymbol(e.target.value)}
+                  placeholder="First symbol"
+                  className="flex-1 px-4 py-2.5 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent w-3/4"
+                />
+                <input
+                  type="text"
+                  value={symbol2}
+                  onChange={(e) => setSymbol2(e.target.value)}
+                  placeholder="Second symbol"
+                  className="flex-1 px-4 py-2.5 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent w-3/4"
+                />
+              </div>
 
-        <div className='flex flex-col items-start justify-start w-full md:w-[400px]'>
-          <div className="flex flex-col items-start justify-start w-full md:w-[400px]">
-            <h2 className="text-xl font-bold mb-4 underline decoration-red-500"> Chosen Assets</h2>
-            <ul className="list-disc pl-4">
-              {assets.map((asset, index) => (
-                <li key={index}>
-                  {asset.symbol} — {asset.start} to {asset.end} (step: {asset.step})
-                </li>
-              ))}
-            </ul>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Start Date</label>
+                  <input
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    type="date"
+                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">End Date</label>
+                  <input
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    type="date"
+                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-400 mb-1">Time Interval</label>
+                <select
+                  value={step}
+                  onChange={(e) => setStep(e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                >
+                  <option value="">Select interval</option>
+                  <option value="1d">Daily</option>
+                  <option value="1wk">Weekly</option>
+                  <option value="1mo">Monthly</option>
+                </select>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!symbol || !symbol2 || !startDate || !endDate || !step) {
+                    alert('Please fill in all fields');
+                    return;
+                  }
+                  const newAsset = { symbol, start: startDate, end: endDate, step };
+                  const newAsset2 = { symbol: symbol2, start: startDate, end: endDate, step };
+                  setAssets([newAsset, newAsset2]);
+                }}
+                className="w-full px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium"
+              >
+                Add Stocks to Compare
+              </motion.button>
+            </motion.div>
+
+            {/* Info Card */}
+            <motion.div 
+              initial={{ opacity: 0, x: -100 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-gray-900 rounded-lg p-6 border border-gray-800"
+            >
+              <h2 className="text-xl font-semibold text-white mb-4">About This Tool</h2>
+              <p className="text-gray-400 mb-4">
+                Compare historical performance between two stocks. View opening and closing prices over your selected time period.
+              </p>
+              <div className="space-y-2 text-sm text-gray-400">
+                <p><span className="text-red-400">Tip:</span> Compare stocks in the same sector for meaningful insights.</p>
+                <p><span className="text-red-400">Note:</span> Daily data works best for shorter time periods.</p>
+              </div>
+            </motion.div>
           </div>
 
-          <div className="flex flex-rows space-x-4 items-center justify-center mt-10 mb-10 ">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={() => {
-                if (assets.length === 0) {
-                  alert('Please add a stock to compare');
-                  return;
-                }
-                fetchHistoricalData(assets[0]);
-                fetchHistoricalData2(assets[1]);
-              }}
-              className="bg-red-500 text-white p-2 rounded-md mb-10"
+          {/* Right Column - Selected Stocks and Graphs */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Selected Stocks Card */}
+            <motion.div 
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="bg-gray-900 rounded-lg p-6 border border-gray-800"
             >
-              Fetch Historical Data
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              onClick={() => {
-                setSwitchGraph(!switchGraph);
-              }}
-              className="bg-red-500 text-white p-2 rounded-md mb-10"
-            >
-              Switch Graph
-            </motion.button>
+              <h2 className="text-xl font-semibold text-white mb-4">Selected Stocks</h2>
+              {assets.length > 0 ? (
+                <div className="space-y-3">
+                  {assets.map((asset, index) => (
+                    <div key={index} className="bg-gray-800 p-3 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">{asset.symbol.toUpperCase()}</span>
+                        <span className="text-xs text-gray-400">
+                          {asset.step === '1d' ? 'Daily' : asset.step === '1wk' ? 'Weekly' : 'Monthly'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-400 mt-1">
+                        {new Date(asset.start).toLocaleDateString()} - {new Date(asset.end).toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No stocks selected yet</p>
+              )}
+
+              <div className="mt-6 space-x-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    if (assets.length === 0) {
+                      alert('Please add stocks to compare first');
+                      return;
+                    }
+                    fetchHistoricalData(assets[0]);
+                    fetchHistoricalData2(assets[1]);
+                  }}
+                  disabled={isLoading}
+                  className={`px-4 py-2.5 rounded-lg font-medium ${
+                    isLoading ? 'bg-gray-700' : 'bg-red-500 hover:bg-red-600'
+                  } text-white`}
+                >
+                  {isLoading ? 'Loading Data...' : 'Fetch Historical Data'}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setSwitchGraph(!switchGraph)}
+                  disabled={historicalData.length === 0}
+                  className={`px-4 py-2.5 rounded-lg font-medium ${
+                    historicalData.length === 0 ? 'bg-gray-700' : 'bg-gray-600 hover:bg-gray-700'
+                  } text-white`}
+                >
+                  {switchGraph ? 'Show Separate' : 'Show Combined'}
+                </motion.button>
+              </div>
+            </motion.div>
+
+            {/* Graphs Section */}
+            {historicalData.length > 0 && historicalData2.length > 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6"
+              >
+                {!switchGraph ? (
+                  <>
+                    <div className="bg-gray-900 p-4 rounded-lg border border-gray-800" style={{ height: '500px' }}>
+                      <Line data={chartData} options={chartOptions} />
+                    </div>
+                    <div className="bg-gray-900 p-4 rounded-lg border border-gray-800" style={{ height: '500px' }}>
+                      <Line data={chartData2} options={chartOptions2} />
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-900 p-4 rounded-lg border border-gray-800" style={{ height: '500px' }}>
+                    <Line data={chartDataSwitch} options={chartOptionsSwitch} />
+                  </div>
+                )}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="bg-gray-900 rounded-lg p-6 border border-gray-800 text-center"
+              >
+                <div className="text-gray-500 mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-white mb-2">No Data to Display</h3>
+                <p className="text-gray-400">
+                  {assets.length > 0 
+                    ? "Click 'Fetch Data' to load the charts" 
+                    : "Add stocks to compare and fetch data"}
+                </p>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>
-
-      <div className="flex flex-row items-center justify-center mt-10 mb-10">
-        {historicalData.length > 0 && historicalData2.length > 0 && switchGraph === false && (
-          <div className="w-full max-w-4xl mx-auto mt-10 p-4 border rounded shadow mb-10 w-[95%]">
-            <Line data={chartData} options={chartOptions} />
-          </div>
-        )}
-
-        {historicalData.length > 0 && historicalData2.length > 0 && switchGraph === false && (
-          <div className="w-full max-w-4xl mx-auto mt-10 p-4 border rounded shadow mb-10 w-[95%]">
-            <Line data={chartData2} options={chartOptions2} />
-          </div>
-        )}
-      </div>
-
-      {switchGraph === true && (
-        <div className="w-full max-w-4xl mx-auto mt-10 p-4 border rounded shadow mb-10">
-          <Line data={chartDataSwitch} options={chartOptionsSwitch} />
-        </div>
-      )}
     </div>
   );
 };
