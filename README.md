@@ -41,7 +41,7 @@ cd fastapi_backend
 python -m venv venv
 venv\Scripts\activate  # On Windows
 # Or use 'source venv/bin/activate' on Mac/Linux
-pip install fastapi uvicorn pydantic yfinance numpy scipy pandas
+pip install fastapi uvicorn pydantic yfinance numpy scipy pandas # in addition, make sure to use a market aux api key and replace this in main.py
 uvicorn main:app --reload
 ```
 
