@@ -20,7 +20,7 @@ Risk : How much does price fluctuate (measured by volatility which is the standa
 
 Return : How much profit do we make? 
 
-The Sharpe Ratio itself is defined as ``` Expected Overall Return / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. 
+The Sharpe Ratio itself is defined as ``` Expected Overall Return - Risk-Free Rate / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. The output of the optimizer works on the assumption that daily returns are independant and identically distributed (iid) meaning we can state that ``` Annual Sharpe Ratio = Daily Sharpe Ratio * $\sqrt{252}$``` where 252 corresponds to the number of trading days in a year.
 
 ## 🛠️ Tech Stack
 
