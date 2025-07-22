@@ -33,7 +33,7 @@ app = FastAPI()
 class PortfolioConstraints(BaseModel):
     min_asset_weight: float = 0.05
     max_asset_weight: float = 0.75
-    risk_free_rate: Optional[float] = 0.05 # Default to 5% if not provided
+    risk_free_rate: Optional[float] = 0.05
 
 class PortfolioInput(BaseModel):
     assets: List[str]
