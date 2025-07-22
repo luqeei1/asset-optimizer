@@ -1,6 +1,6 @@
 # 📈 Asset Optimization Using Sharpe Ratio
 
-🚧 **Note:** This project is still under development. Further UI improvements and minor functionality changes are to be expected in the near future. Historical portfolio managment will also be provided soon.  
+🚧 **Note:** This project is still under development. Historical portfolio managment will also be provided soon.  
 
 Welcome to my full-stack asset optimization application!  
 This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
