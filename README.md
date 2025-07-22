@@ -28,6 +28,7 @@ The Sharpe Ratio itself is defined as ``` Expected Overall Return - Risk-Free Ra
 - **Backend:** Express.js (TypeScript)  
 - **Microservice:** Python + FastAPI  
 - **Libraries:** `yfinance`, `numpy`, `scipy`, `pandas`, `fastapi`, `uvicorn`, `pydantic`,`Charts.js`
+- **APIs:** `marketaux api`
 
 ---
 
