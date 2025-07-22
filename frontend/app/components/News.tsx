@@ -14,20 +14,18 @@ interface Article {
   source?: string
 }
 
-
-
-
-
 const News = () => {
-  const [articles, setArticles] = useState<Article[]>([])
+  const [allArticles, setAllArticles] = useState<Article[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const articlesPerPage = 3
 
-  const fetchNews = async (page: number, query: string = '') => {
+  const fetchNews = async (query: string = '') => {
     setIsLoading(true)
     try {
-      const url = `http://localhost:5000/news?page=${page}${query ? `&query=${query}` : ''}`
+      
+      const url = `http://localhost:5000/news?page=1&limit=50${query ? `&query=${query}` : ''}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {
@@ -40,7 +38,9 @@ const News = () => {
       }
 
       const data = await response.json()
-      setArticles(data.results || [])
+      console.log(`Received ${data.results?.length} articles out of ${data.total} total`);
+      setAllArticles(data.results || [])
+      setCurrentPage(1) 
     } catch (error: any) {
       console.error('Error fetching news:', error)
     } finally {
@@ -49,14 +49,32 @@ const News = () => {
   }
 
  
+  const getCurrentPageArticles = () => {
+    const startIndex = (currentPage - 1) * articlesPerPage
+    const endIndex = startIndex + articlesPerPage
+    return allArticles.slice(startIndex, endIndex)
+  }
+
+  const totalPages = Math.ceil(allArticles.length / articlesPerPage)
+
   useEffect(() => {
-    fetchNews(currentPage, searchQuery)
-  }, [currentPage, searchQuery])
+    fetchNews(searchQuery)
+  }, [searchQuery])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    fetchNews(1, searchQuery)
+    fetchNews(searchQuery)
   }
+
+  const handlePrevious = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1))
+  }
+
+  const handleNext = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1))
+  }
+
+  const currentArticles = getCurrentPageArticles()
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -97,21 +115,27 @@ const News = () => {
             <h3 className="text-2xl font-bold">
               <span className="text-red-500">Latest</span> Financial News
             </h3>
-            <div className="flex space-x-2">
-              <button 
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 bg-gray-800 rounded-md disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button 
-                onClick={() => setCurrentPage(prev => prev + 1)}
-                disabled={isLoading}
-                className="px-4 py-2 bg-gray-800 rounded-md disabled:opacity-50"
-              >
-                Next
-              </button>
+            <div className="flex items-center space-x-4">
+              {/* Page indicator */}
+              <span className="text-gray-400 text-sm">
+                Page {currentPage} of {totalPages} ({allArticles.length} total articles)
+              </span>
+              <div className="flex space-x-2">
+                <button 
+                  onClick={handlePrevious}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-gray-800 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition"
+                >
+                  Previous
+                </button>
+                <button 
+                  onClick={handleNext}
+                  disabled={currentPage >= totalPages || isLoading}
+                  className="px-4 py-2 bg-gray-800 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 transition"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
 
@@ -119,19 +143,19 @@ const News = () => {
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
             </div>
-          ) : articles.length === 0 ? (
+          ) : currentArticles.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-400 text-xl">No articles found.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {articles.map((article, i) => (
+            <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-6">
+              {currentArticles.map((article, i) => (
                 <motion.article
-                  key={article.uuid}
+                  key={`${article.uuid}-${currentPage}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: i * 0.1 }}
-                  className="bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition"
+                  className="bg-gray-900 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition hover:scale-105"
                 >
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-2">
@@ -167,11 +191,42 @@ const News = () => {
               ))}
             </div>
           )}
+
+          
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-8 space-x-2">
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-1 rounded text-sm transition ${
+                    currentPage === pageNum 
+                      ? 'bg-red-500 text-white' 
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+              {totalPages > 5 && (
+                <>
+                  <span className="text-gray-400">...</span>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    className={`px-3 py-1 rounded text-sm transition ${
+                      currentPage === totalPages 
+                        ? 'bg-red-500 text-white' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    }`}
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </section>
       </main>
-
-      
-      
     </div>
   )
 }

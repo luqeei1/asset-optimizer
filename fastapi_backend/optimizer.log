@@ -64,3 +64,19 @@ Optimization Results:
 1 Failed download:
 2025-07-07 23:59:40,608 - ERROR - ['SQ']: YFPricesMissingError('possibly delisted; no price data found  (period=126d) (Yahoo error = "No data found, symbol may be delisted")')
 2025-07-07 23:59:40,613 - ERROR - Optimization error: Some assets may not have enough data.
+2025-07-22 20:30:42,155 - ERROR - Optimization error: 'PortfolioConstraints' object has no attribute 'max_portfolio_volatility'
+2025-07-22 20:32:20,955 - ERROR - Optimization error: 'PortfolioConstraints' object has no attribute 'max_portfolio_volatility'
+2025-07-22 21:06:26,018 - ERROR - HTTP Error 404: 
+2025-07-22 21:06:26,161 - ERROR - $APPLE: possibly delisted; no timezone found
+2025-07-22 21:06:26,495 - ERROR - HTTP Error 404: 
+2025-07-22 21:06:26,596 - ERROR - $NVIDIA: possibly delisted; no timezone found
+2025-07-22 21:06:29,282 - ERROR - $APPLE: possibly delisted; no timezone found
+2025-07-22 21:06:29,294 - ERROR - $NVIDIA: possibly delisted; no timezone found
+2025-07-22 21:06:30,059 - ERROR - $APPLE: possibly delisted; no timezone found
+2025-07-22 21:06:30,064 - ERROR - $NVIDIA: possibly delisted; no timezone found
+2025-07-22 21:06:30,508 - ERROR - $APPLE: possibly delisted; no timezone found
+2025-07-22 21:06:30,516 - ERROR - $NVIDIA: possibly delisted; no timezone found
+2025-07-22 21:06:30,746 - ERROR - $APPLE: possibly delisted; no timezone found
+2025-07-22 21:06:30,752 - ERROR - $NVIDIA: possibly delisted; no timezone found
+2025-07-22 21:06:30,909 - ERROR - $APPLE: possibly delisted; no timezone found
+2025-07-22 21:06:30,914 - ERROR - $NVIDIA: possibly delisted; no timezone found

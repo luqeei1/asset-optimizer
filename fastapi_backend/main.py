@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 import yfinance as yf
 import pandas as pd
@@ -30,14 +30,14 @@ logging.basicConfig(
 app = FastAPI()
 
 
-
 class PortfolioConstraints(BaseModel):
     min_asset_weight: float = 0.05
     max_asset_weight: float = 0.75
+    risk_free_rate: Optional[float] = 0.05 # Default to 5% if not provided
 
 class PortfolioInput(BaseModel):
     assets: List[str]
-    window_days: int = 126
+    window_days: int = 252
     constraints: PortfolioConstraints
 
 class HistoricalData(BaseModel):
@@ -50,6 +50,22 @@ class FindRequest(BaseModel):
     name: str
 
 
+def get_risk_free_rate() -> float:
+    """
+    Fetch current 10-year Treasury rate as risk-free rate proxy.
+    Falls back to default if fetch fails.
+    """
+    try:
+        treasury = yf.Ticker("^TNX")
+        hist = treasury.history(period="5d")
+        if not hist.empty:
+            return hist['Close'].iloc[-1] / 100.0
+    except Exception as e:
+        logging.warning(f"Failed to fetch risk-free rate: {e}")
+    
+    # Fallback to default 5%
+    return 0.05
+
 
 def get_historical_returns(assets: List[str], window_days: int) -> pd.DataFrame:
     df = yf.download(assets, period=f"{window_days}d")["Close"]
@@ -57,21 +73,64 @@ def get_historical_returns(assets: List[str], window_days: int) -> pd.DataFrame:
         raise ValueError("Some assets may not have enough data.")
     return df.pct_change().dropna()
 
-def annualize(return_, std_):
+def annualize(return_, std_, risk_free_rate: float = 0.0):
     ann_return = return_ * 252
     ann_std = std_ * np.sqrt(252)
-    ann_sharpe = ann_return / max(ann_std, 1e-8)
+    # Proper Sharpe ratio: (return - risk_free_rate) / volatility
+    ann_sharpe = (ann_return - risk_free_rate) / max(ann_std, 1e-8)
     return ann_return, ann_std, ann_sharpe
+
+def create_fallback_weights(n_assets: int, constraints_obj: PortfolioConstraints) -> np.ndarray:
+    """
+    Create fallback weights that respect min/max constraints.
+    """
+    equal_weight = 1.0 / n_assets
+    
+    
+    if equal_weight < constraints_obj.min_asset_weight:
+        
+        weights = np.full(n_assets, constraints_obj.min_asset_weight)
+        total = weights.sum()
+        if total > 1.0:
+            
+            weights = weights / total
+    elif equal_weight > constraints_obj.max_asset_weight:
+       
+        max_assets = int(1.0 / constraints_obj.max_asset_weight)
+        weights = np.full(n_assets, constraints_obj.min_asset_weight)
+        
+        weights[:max_assets] = constraints_obj.max_asset_weight
+       
+        remaining_weight = 1.0 - (max_assets * constraints_obj.max_asset_weight)
+        remaining_assets = n_assets - max_assets
+        if remaining_assets > 0 and remaining_weight > 0:
+            weights[max_assets:] = remaining_weight / remaining_assets
+    else:
+       
+        weights = np.full(n_assets, equal_weight)
+    
+    
+    return weights / weights.sum()
 
 def optimize_weights(returns: pd.DataFrame, constraints_obj: PortfolioConstraints) -> np.ndarray:
     cov_matrix = returns.cov()
     mean_returns = returns.mean()
     n_assets = len(returns.columns)
+    
+    
+    risk_free_rate = constraints_obj.risk_free_rate
+    if risk_free_rate is None:
+        risk_free_rate = get_risk_free_rate()
+    
+    
+    daily_rf_rate = risk_free_rate / 252
 
     def negative_sharpe_ratio(weights):
-        port_return = np.dot(weights, mean_returns) * 252
-        port_volatility = np.sqrt(weights.T @ cov_matrix @ weights) * np.sqrt(252)
-        return -port_return / max(port_volatility, 1e-8)
+        port_return = np.dot(weights, mean_returns)  
+        port_volatility = np.sqrt(weights.T @ cov_matrix @ weights)  
+        
+        sharpe = (port_return - daily_rf_rate) / max(port_volatility, 1e-8)
+        return -sharpe  
 
     bounds = [(constraints_obj.min_asset_weight, constraints_obj.max_asset_weight)] * n_assets
     constraints = [{'type': 'eq', 'fun': lambda w: np.sum(w) - 1}]
@@ -87,10 +146,9 @@ def optimize_weights(returns: pd.DataFrame, constraints_obj: PortfolioConstraint
 
     if not result.success:
         logging.warning(f"Optimization failed: {result.message}")
-        return np.ones(n_assets) / n_assets
+        return create_fallback_weights(n_assets, constraints_obj)
 
     return result.x
-
 
 
 @app.post("/optimize")
@@ -103,18 +161,28 @@ async def optimize_portfolio(portfolio: PortfolioInput):
 
         weights = optimize_weights(returns, portfolio.constraints)
 
+        
+        risk_free_rate = portfolio.constraints.risk_free_rate
+        if risk_free_rate is None:
+            risk_free_rate = get_risk_free_rate()
+
         daily_return = np.dot(weights, returns.mean())
         daily_risk = np.sqrt(weights.T @ returns.cov() @ weights)
-        ann_return, ann_risk, ann_sharpe = annualize(daily_return, daily_risk)
+        ann_return, ann_risk, ann_sharpe = annualize(daily_return, daily_risk, risk_free_rate)
+
+       
+        daily_rf_rate = risk_free_rate / 252
+        daily_sharpe = (daily_return - daily_rf_rate) / max(daily_risk, 1e-8)
 
         return {
             "weights": {asset: round(w, 4) for asset, w in zip(portfolio.assets, weights)},
             "daily_return": round(daily_return, 6),
             "daily_risk": round(daily_risk, 6),
-            "daily_sharpe_ratio": round(daily_return / max(daily_risk, 1e-8), 4),
+            "daily_sharpe_ratio": round(daily_sharpe, 4),
             "annual_return": round(ann_return, 6),
             "annual_risk": round(ann_risk, 6),
             "annual_sharpe_ratio": round(ann_sharpe, 4),
+            "risk_free_rate_used": round(risk_free_rate, 4),
         }
 
     except Exception as e:
@@ -143,11 +211,28 @@ async def get_historical(data: HistoricalData):
 @app.get("/news")
 async def get_market_news():
     try:
-        date = datetime.now().strftime("%Y-%m-%d")
-        url = f"https://api.marketaux.com/v1/news/all?published_after={date}T00:00&api_token={API_KEY}"
-        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
-        return response.json()["data"]
+        date_7_days_ago = (datetime.now() - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
+        all_articles = []
+        
+       
+        for page in range(1, 4): 
+            url = f"https://api.marketaux.com/v1/news/all?published_after={date_7_days_ago}T00:00&limit=25&page={page}&api_token={API_KEY}"
+            response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            
+            if response.status_code == 200:
+                data = response.json()
+                articles = data.get('data', [])
+                all_articles.extend(articles)
+                
+               
+                if len(articles) == 0:
+                    break
+            else:
+                break
+        
+        print(f"Total fetched articles: {len(all_articles)}")
+        return all_articles
+        
     except Exception as e:
+        logging.error(f"News fetch error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
-
-
