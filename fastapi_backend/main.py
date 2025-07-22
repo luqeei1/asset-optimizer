@@ -59,7 +59,7 @@ def get_risk_free_rate() -> float:
         treasury = yf.Ticker("^TNX")
         hist = treasury.history(period="5d")
         if not hist.empty:
-            return hist['Close'].iloc[-1] / 100.0
+            return hist['Close'].iloc[-1] / 100.0 # should be like 4.5% or something
     except Exception as e:
         logging.warning(f"Failed to fetch risk-free rate: {e}")
     
