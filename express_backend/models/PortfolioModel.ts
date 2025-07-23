@@ -18,7 +18,7 @@ const PortfolioSchema = new Schema<PortfolioDocument>({
     constraints: {
         min_asset_weight: { type: Number, required: true },
         max_asset_weight: { type: Number, required: true },
-        risk_free_rate: { type: Number, required: true }
+        risk_free_rate: { type: Number, required: false }
     }
 });
 
