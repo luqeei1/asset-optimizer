@@ -7,7 +7,7 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 - ⏰ A **stock market opening/closing time comparator**  
 - 💼 A **portfolio optimizer** using the Sharpe ratio
 
-**NOTE** SharpeOpt also consists of a historical portfolio option so you can save and access portfolios you have made and tested. Please be aware that this is a public portfolio database as of now and individual databases will be made once authentication is added and SharpeOpt is deployed. 
+**NOTE**: SharpeOpt also consists of a historical portfolio option so you can save and access portfolios you have made and tested. Please be aware that this is a public portfolio database as of now and individual databases will be made once authentication is added and SharpeOpt is deployed. 
 
 
 ---
