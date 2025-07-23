@@ -4,7 +4,7 @@ Welcome to my full-stack asset optimization application!
 This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
 
 - 📰 A **news** section with financial updates  
-- ⏰ A **stock market opening/closing time comparator**  
+- ⏰ A **stock opening/closing time comparator**  
 - 💼 A **portfolio optimizer** using the Sharpe ratio
 
 **NOTE**: SharpeOpt also consists of a historical portfolio option so you can save and access portfolios you have made and tested. Please be aware that this is a public portfolio database as of now and access to individual portfolios will be made once authentication is added and SharpeOpt is deployed. 
