@@ -1,6 +1,4 @@
-# 📈 Asset Optimization Using Sharpe Ratio
-
-🚧 **Note:** This project is still under development. Historical portfolio managment will also be provided soon.  
+# 📈 Welcome To SharpeOpt ( An Asset Optimization Using Sharpe Ratio ) 
 
 Welcome to my full-stack asset optimization application!  
 This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
@@ -8,6 +6,8 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 - 📰 A **news** section with financial updates  
 - ⏰ A **stock market opening/closing time comparator**  
 - 💼 A **portfolio optimizer** using the Sharpe ratio
+
+**NOTE** SharpeOpt also consists of a historical portfolio option so you can save and access portfolios you have made and tested. Please be aware that this is a public portfolio database as of now and individual databases will be made once authentication is added and SharpeOpt is deployed. 
 
 
 ---
@@ -20,7 +20,7 @@ Risk : How much does price fluctuate (measured by volatility which is the standa
 
 Return : How much profit do we make? 
 
-The Sharpe Ratio itself is defined as ``` Expected Overall Return - Risk-Free Rate / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. The output of the optimizer works on the assumption that daily returns are independant and identically distributed (iid) meaning we can state that ```Annual Sharpe Ratio = Daily Sharpe Ratio * sqrt(252)``` .
+The Sharpe Ratio itself is defined as ``` Expected Overall Return - Risk-Free Rate / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. The output of the optimizer works on the assumption that daily returns are independant and identically distributed (iid) meaning we can state that ```Annual Sharpe Ratio = Daily Sharpe Ratio * sqrt(252)```.
 
 ## 🛠️ Tech Stack
 
