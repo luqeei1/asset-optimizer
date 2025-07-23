@@ -4,6 +4,29 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import NavBar from './NavBar';
+import { 
+  FiArrowLeft, 
+  FiSearch, 
+  FiX, 
+  FiAlertCircle, 
+  FiSettings, 
+  FiRefreshCw,
+  FiCheck,
+  FiRotateCcw
+} from 'react-icons/fi';
+import { FaChartLine, FaPercentage } from 'react-icons/fa';
+import { CiSaveDown1 } from 'react-icons/ci';
+import { s } from 'motion/react-client';
+
+interface Portfolio {
+  assets: string[];
+  window_days: number;
+  constraints: {
+    min_asset_weight: number;
+    max_asset_weight: number;
+    risk_free_rate?: number;
+  };
+} 
 
 interface OptimizeResponse {
   weights: { [key: string]: number };
@@ -35,10 +58,20 @@ const Main = () => {
   const [foundSymbol, setFoundSymbol] = useState<string | null>(null);
   const [minAssetWeight, setMinAssetWeight] = useState(0.05); 
   const [maxAssetWeight, setMaxAssetWeight] = useState(0.75); 
-  const [riskFreeRate, setRiskFreeRate] = useState<number | undefined>(undefined); // backend auto fetches
+  const [riskFreeRate, setRiskFreeRate] = useState<number | undefined>(undefined);
   const [displayResult, setDisplayResult] = useState<OptimizeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [portfolio, setPortfolio] = useState<Portfolio>({
+    assets: [],
+    window_days: 252,
+    constraints: {
+      min_asset_weight: 0.05,
+      max_asset_weight: 0.75,
+      risk_free_rate: undefined
+    }
+  });
+
   const router = useRouter();
 
   const FindAsset = async (companyName: string) => {
@@ -57,7 +90,7 @@ const Main = () => {
 
       const symbolResponse = await response.json();
 
-      if (symbolResponse && symbolResponse.symbol && symbolResponse.symbol !== 'Not found') {
+      if (symbolResponse?.symbol && symbolResponse.symbol !== 'Not found') {
         const symbol = symbolResponse.symbol;
         if (!assets.includes(symbol)) {
           setAssets((prev) => [...prev, symbol]);
@@ -75,6 +108,44 @@ const Main = () => {
       setError(error instanceof Error ? error.message : 'Failed to find symbol');
     }
   };
+
+  const savetoMongoDB = async () => {
+    if (assets.length < 2) {
+      setError('Please add at least 2 assets to save the portfolio');
+      return;
+    }
+
+    const payload: Portfolio = {
+      assets,
+      window_days: windowDays,
+      constraints: {
+        min_asset_weight: minAssetWeight,
+        max_asset_weight: maxAssetWeight,
+        risk_free_rate: riskFreeRate
+      }
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save portfolio');
+      }
+
+      const data = await response.json();
+      console.log('Portfolio saved:', data);
+      setPortfolio(payload);
+    } catch (error) {
+      console.error('Error saving portfolio:', error);
+      setError(error instanceof Error ? error.message : 'Failed to save portfolio');
+    }
+
+  }
 
   const optimizePortfolio = async () => {
     if (assets.length < 2) {
@@ -96,8 +167,6 @@ const Main = () => {
         }
       };
 
-      console.log('Sending optimization request:', payload);
-
       const response = await fetch('http://localhost:5000/optimize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -110,7 +179,6 @@ const Main = () => {
       }
 
       const data: OptimizeResponse = await response.json();
-      console.log('Optimization result:', data);
       setDisplayResult(data);
     } catch (error) {
       console.error('Error optimizing portfolio:', error);
@@ -156,18 +224,7 @@ const Main = () => {
             onClick={() => router.push('/')}
             className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <FiArrowLeft className="h-5 w-5" />
             Return
           </motion.button>
         </div>
@@ -179,13 +236,7 @@ const Main = () => {
             className="mb-6 p-4 bg-red-900/20 border border-red-500/30 rounded-lg"
           >
             <div className="flex items-center gap-2 text-red-400">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+              <FiAlertCircle className="h-5 w-5" />
               <span className="font-medium">Error: {error}</span>
             </div>
           </motion.div>
@@ -193,7 +244,6 @@ const Main = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="col-span-2 space-y-6">
-            
             <motion.div
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -225,18 +275,7 @@ const Main = () => {
                   className="px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
                   aria-label="Search company"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <FiSearch className="h-5 w-5" />
                 </button>
               </div>
 
@@ -276,18 +315,7 @@ const Main = () => {
                           className="ml-2 text-gray-400 hover:text-white"
                           aria-label={`Remove ${symbol}`}
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                          <FiX className="h-4 w-4" />
                         </button>
                       </div>
                     ))}
@@ -296,7 +324,6 @@ const Main = () => {
               )}
             </motion.div>
 
-            
             <motion.div
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -367,7 +394,6 @@ const Main = () => {
             </motion.div>
           </div>
 
-          
           <motion.div
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
@@ -390,42 +416,12 @@ const Main = () => {
                 >
                   {isLoading ? (
                     <>
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <FiRefreshCw className="animate-spin h-4 w-4 mr-2" />
                       Optimizing...
                     </>
                   ) : (
                     <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <FaChartLine className="h-5 w-5" />
                       Optimize Portfolio
                     </>
                   )}
@@ -437,19 +433,18 @@ const Main = () => {
                   onClick={resetPortfolio}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <FiRotateCcw className="h-5 w-5" />
                   Reset Portfolio
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {savetoMongoDB()}}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <CiSaveDown1 className="h-5 w-5" />
+                  Save Portfolio
                 </motion.button>
               </div>
 
@@ -470,7 +465,7 @@ const Main = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold text-white">Optimization Results</h2>
                   <span className="text-xs bg-green-900/20 text-green-400 px-2 py-1 rounded">
-                    Success
+                    <FiCheck className="inline mr-1" /> Success
                   </span>
                 </div>
 

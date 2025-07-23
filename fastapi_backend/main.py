@@ -174,6 +174,10 @@ async def optimize_portfolio(portfolio: PortfolioInput):
         daily_rf_rate = risk_free_rate / 252
         daily_sharpe = (daily_return - daily_rf_rate) / max(daily_risk, 1e-8)
 
+        print(f"Optimized Weights: {weights}")
+        print(f"Daily Return: {daily_return}, Daily Risk: {daily_risk}, Daily Sharpe Ratio: {daily_sharpe}")
+        print(f"Annual Return: {ann_return}, Annual Risk: {ann_risk}, Annual Sharpe Ratio: {ann_sharpe}")
+
         return {
             "weights": {asset: round(w, 4) for asset, w in zip(portfolio.assets, weights)},
             "daily_return": round(daily_return, 6),

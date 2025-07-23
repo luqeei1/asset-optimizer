@@ -4,8 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import PortfolioModel from './models/PortfolioModel';
 import axios from 'axios';
-import RequestBody from './types/RequestBody';
 import { parse } from 'path';
+import Portfolio from './models/PortfolioModel'; 
 
 const app = express();
 
@@ -267,6 +267,23 @@ app.get('/health', (req: Request, res: Response) => {
     });
 });
 
+app.post('/save', async (req: Request, res: Response) => {
+    const portfolioData = req.body;
+
+    if (!portfolioData) {
+        res.status(400).json({ error: 'Portfolio data is required' });
+        return;
+    }
+
+    try {
+        const newPortfolio = new Portfolio(portfolioData);
+        await newPortfolio.save();
+        res.status(201).json(newPortfolio);
+    } catch (error: any) {
+        console.error('Error saving portfolio:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 mongoose
     .connect(url)

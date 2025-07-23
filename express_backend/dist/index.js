@@ -9,18 +9,18 @@ const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const PortfolioModel_1 = __importDefault(require("./models/PortfolioModel"));
 const axios_1 = __importDefault(require("axios"));
+const PortfolioModel_2 = __importDefault(require("./models/PortfolioModel"));
 const app = (0, express_1.default)();
 dotenv_1.default.config();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 let newsCache = null;
 let lastFetched = 0;
-const CACHE_TTL = 1000 * 60 * 10; // 10 minutes cache
+const CACHE_TTL = 1000 * 60 * 10;
 const url = process.env.MONGO_URL || " ";
 app.post('/optimize', async (req, res) => {
     const { assets, window_days, constraints } = req.body;
     console.log('Received from frontend:', req.body);
-    // Validate required fields
     if (!assets || !Array.isArray(assets) || assets.length === 0) {
         res.status(400).json({ error: 'Assets array is required and cannot be empty' });
         return;
@@ -35,14 +35,13 @@ app.post('/optimize', async (req, res) => {
     }
     try {
         const FastAPIUrl = 'http://localhost:8000/optimize';
-        // Structure payload to match FastAPI PortfolioInput model
         const payload = {
             assets: assets,
             window_days: window_days,
             constraints: {
                 min_asset_weight: constraints.min_asset_weight || 0.05,
                 max_asset_weight: constraints.max_asset_weight || 0.75,
-                risk_free_rate: constraints.risk_free_rate || null // Allow null to auto-fetch
+                risk_free_rate: constraints.risk_free_rate || null
             }
         };
         console.log('Sending to FastAPI:', payload);
@@ -52,7 +51,6 @@ app.post('/optimize', async (req, res) => {
     }
     catch (error) {
         console.error('Axios/FastAPI error:', error.response?.data || error.message);
-        // Return more specific error information
         if (error.response?.data) {
             res.status(error.response.status || 500).json({
                 error: error.response.data.detail || 'FastAPI Error',
@@ -110,7 +108,6 @@ app.get('/news', async (req, res) => {
     const start = (page - 1) * limit;
     const end = page * limit;
     try {
-        // Check if cache is expired or doesn't exist
         if (!newsCache || Date.now() - lastFetched > CACHE_TTL) {
             console.log('Cache expired or empty, fetching fresh news from FastAPI...');
             const response = await axios_1.default.get('http://localhost:8000/news');
@@ -218,7 +215,6 @@ app.get('/portfolio/:id', async (req, res) => {
     }
     catch (error) {
         console.error('Database error fetching portfolio:', error);
-        // Handle invalid ObjectId format
         if (error.name === 'CastError') {
             res.status(400).json({ error: 'Invalid portfolio ID format' });
         }
@@ -227,7 +223,6 @@ app.get('/portfolio/:id', async (req, res) => {
         }
     }
 });
-// Health check endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'OK',
@@ -235,7 +230,22 @@ app.get('/health', (req, res) => {
         uptime: process.uptime()
     });
 });
-// Connect to MongoDB and start server
+app.post('/save', async (req, res) => {
+    const portfolioData = req.body;
+    if (!portfolioData) {
+        res.status(400).json({ error: 'Portfolio data is required' });
+        return;
+    }
+    try {
+        const newPortfolio = new PortfolioModel_2.default(portfolioData);
+        await newPortfolio.save();
+        res.status(201).json(newPortfolio);
+    }
+    catch (error) {
+        console.error('Error saving portfolio:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 mongoose_1.default
     .connect(url)
     .then(() => {

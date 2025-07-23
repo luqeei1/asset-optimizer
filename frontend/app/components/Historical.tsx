@@ -5,6 +5,7 @@ import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement,
 import { Line } from 'react-chartjs-2';
 import { useRouter } from 'next/navigation';
 import NavBar from './NavBar';
+import { FiArrowLeft, FiBarChart2 } from 'react-icons/fi';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -259,26 +260,15 @@ const Historical = () => {
             onClick={() => router.push('/')}
             className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <FiArrowLeft className="h-5 w-5" />
             Return
           </motion.button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Inputs */}
+          
           <div className="space-y-6">
-            {/* Stock Input Card */}
+            
             <motion.div 
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -363,7 +353,7 @@ const Historical = () => {
               </motion.button>
             </motion.div>
 
-            {/* Info Card */}
+            
             <motion.div 
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -381,9 +371,9 @@ const Historical = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - Selected Stocks and Graphs */}
+         
           <div className="lg:col-span-2 space-y-6">
-            {/* Selected Stocks Card */}
+           
             <motion.div 
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -444,7 +434,7 @@ const Historical = () => {
               </div>
             </motion.div>
 
-            {/* Graphs Section */}
+            
             {historicalData.length > 0 && historicalData2.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -473,9 +463,7 @@ const Historical = () => {
                 className="bg-gray-900 rounded-lg p-6 border border-gray-800 text-center"
               >
                 <div className="text-gray-500 mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
+                  <FiBarChart2 className="h-12 w-12 mx-auto" />
                 </div>
                 <h3 className="text-lg font-medium text-white mb-2">No Data to Display</h3>
                 <p className="text-gray-400">
