@@ -1,6 +1,6 @@
 # 📈 Asset Optimization Using Sharpe Ratio
 
-🚧 **Note:** This project is still under development. Further UI improvements and minor functionality changes are to be expected in the near future. Historical portfolio managment will also be provided soon.  
+🚧 **Note:** This project is still under development. Historical portfolio managment will also be provided soon.  
 
 Welcome to my full-stack asset optimization application!  
 This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
@@ -20,7 +20,7 @@ Risk : How much does price fluctuate (measured by volatility which is the standa
 
 Return : How much profit do we make? 
 
-The Sharpe Ratio itself is defined as ``` Expected Overall Return / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. 
+The Sharpe Ratio itself is defined as ``` Expected Overall Return - Risk-Free Rate / Overall Risk ```, giving us an idea of how much return we get per unit risk. A higher Sharpe Ratio means that we have more reward for the risk we take. This overall optimisation process is finding weights such that the Sharpe Ratio is maximised. The output of the optimizer works on the assumption that daily returns are independant and identically distributed (iid) meaning we can state that ```Annual Sharpe Ratio = Daily Sharpe Ratio * sqrt(252)``` .
 
 ## 🛠️ Tech Stack
 
@@ -28,6 +28,7 @@ The Sharpe Ratio itself is defined as ``` Expected Overall Return / Overall Risk
 - **Backend:** Express.js (TypeScript)  
 - **Microservice:** Python + FastAPI  
 - **Libraries:** `yfinance`, `numpy`, `scipy`, `pandas`, `fastapi`, `uvicorn`, `pydantic`,`Charts.js`
+- **APIs:** `marketaux api`
 
 ---
 
@@ -40,7 +41,7 @@ cd fastapi_backend
 python -m venv venv
 venv\Scripts\activate  # On Windows
 # Or use 'source venv/bin/activate' on Mac/Linux
-pip install fastapi uvicorn pydantic yfinance numpy scipy pandas
+pip install fastapi uvicorn pydantic yfinance numpy scipy pandas # in addition, make sure to use a market aux api key and replace this in main.py
 uvicorn main:app --reload
 ```
 
