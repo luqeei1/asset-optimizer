@@ -246,6 +246,16 @@ app.post('/save', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+app.get('/portfolios', async (req, res) => {
+    try {
+        const portfolios = await PortfolioModel_1.default.find();
+        res.status(200).json(portfolios);
+    }
+    catch (error) {
+        console.error('Error fetching portfolios:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 mongoose_1.default
     .connect(url)
     .then(() => {

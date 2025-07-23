@@ -285,6 +285,16 @@ app.post('/save', async (req: Request, res: Response) => {
     }
 });
 
+app.get('/portfolios', async (req: Request, res: Response) => {
+    try {
+        const portfolios = await PortfolioModel.find();
+        res.status(200).json(portfolios);
+    } catch (error: any) {
+        console.error('Error fetching portfolios:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 mongoose
     .connect(url)
     .then(() => {

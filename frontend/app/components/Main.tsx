@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import NavBar from './NavBar';
@@ -14,7 +14,7 @@ import {
   FiCheck,
   FiRotateCcw
 } from 'react-icons/fi';
-import { FaChartLine, FaPercentage } from 'react-icons/fa';
+import { FaChartLine, FaHistory, FaPercentage, FaStepBackward, FaStepForward } from 'react-icons/fa';
 import { CiSaveDown1 } from 'react-icons/ci';
 import { s } from 'motion/react-client';
 
@@ -62,6 +62,8 @@ const Main = () => {
   const [displayResult, setDisplayResult] = useState<OptimizeResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [previousPortfolios, setPreviousPortfolios] = useState<Portfolio[]>([]);
+  const [showPrevious, setShowPrevious] = useState(false);
   const [portfolio, setPortfolio] = useState<Portfolio>({
     assets: [],
     window_days: 252,
@@ -73,6 +75,21 @@ const Main = () => {
   });
 
   const router = useRouter();
+
+  const fetchPreviousPortfolios = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/portfolios');
+      if (!response.ok) {
+        throw new Error('Failed to fetch previous portfolios');
+      }
+      const data = await response.json();
+      setPreviousPortfolios(data);
+      console.log(`Fetched ${data.length} previous portfolios`);
+    } catch (error) {
+      console.error('Error fetching previous portfolios:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch previous portfolios');
+    }
+  };
 
   const FindAsset = async (companyName: string) => {
     try {
@@ -187,6 +204,10 @@ const Main = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect( () => {
+    fetchPreviousPortfolios();
+  }, [])
 
   const resetPortfolio = () => {
     setAssets([]);
@@ -446,6 +467,44 @@ const Main = () => {
                   <CiSaveDown1 className="h-5 w-5" />
                   Save Portfolio
                 </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => { 
+                    setShowPrevious(!showPrevious);
+                    if (!showPrevious) {
+                      setAssets(previousPortfolios[0]?.assets || []);
+                      setWindowDays(previousPortfolios[0]?.window_days || 252);
+                      setFoundSymbol(null);
+                      setMinAssetWeight(previousPortfolios[0]?.constraints.min_asset_weight || 0.05);
+                      setMaxAssetWeight(previousPortfolios[0]?.constraints.max_asset_weight || 0.75);
+                      setRiskFreeRate(previousPortfolios[0]?.constraints.risk_free_rate || undefined);
+                      setDisplayResult(showPrevious ? null : displayResult);
+                      setError(null);
+                      setInput('');
+                    } 
+                    else {
+                      resetPortfolio(); 
+                    }
+                  } 
+                }
+
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  <FaHistory className="h-5 w-5" />
+                  {showPrevious ? 'Hide Previous Portfolios' : 'Show Previous Portfolios'}
+                </motion.button>
+
+                {showPrevious  && (
+                  <div className="mt-4 bg-gray-800 rounded-lg p-4 gap-x-4">
+                    <div className="flex items-center justify-between">
+                      <FaStepBackward className="h-5 w-5 text-gray-400 hover:scale-130 duration-200 cursor-pointer" />
+                      <span className="text-gray-100 text-m text-center flex-1">Previous Portfolios</span>
+                      <FaStepForward className="h-5 w-5 text-gray-400 hover:scale-130 duration-200 cursor-pointer" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {assets.length > 0 && (
