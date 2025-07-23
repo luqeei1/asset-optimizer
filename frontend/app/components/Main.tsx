@@ -64,6 +64,8 @@ const Main = () => {
   const [error, setError] = useState<string | null>(null);
   const [previousPortfolios, setPreviousPortfolios] = useState<Portfolio[]>([]);
   const [showPrevious, setShowPrevious] = useState(false);
+  const [nextPortfolioIndex, setNextPortfolioIndex] = useState(0);
+  const [previousPortfolioIndex, setPreviousPortfolioIndex] = useState(0);
   const [portfolio, setPortfolio] = useState<Portfolio>({
     assets: [],
     window_days: 252,
@@ -207,7 +209,42 @@ const Main = () => {
 
   useEffect( () => {
     fetchPreviousPortfolios();
-  }, [])
+    setNextPortfolioIndex(1);
+    setPreviousPortfolioIndex(previousPortfolios.length - 1);
+  }, []);
+
+  const nextPortfolio = () => {
+    setAssets(previousPortfolios[nextPortfolioIndex]?.assets || []);
+    setWindowDays(previousPortfolios[nextPortfolioIndex]?.window_days || 252);
+    setFoundSymbol(null);
+    setMinAssetWeight(previousPortfolios[nextPortfolioIndex]?.constraints.min_asset_weight || 0.05);
+    setMaxAssetWeight(previousPortfolios[nextPortfolioIndex]?.constraints.max_asset_weight || 0.75);
+    setRiskFreeRate(previousPortfolios[nextPortfolioIndex]?.constraints.risk_free_rate || undefined);
+    setDisplayResult(showPrevious ? null : displayResult);
+    setError(null);
+    setInput('');
+    setNextPortfolioIndex((prev) => {
+      const nextIndex = prev + 1;
+      return nextIndex < previousPortfolios.length ? nextIndex : 0; 
+    });
+
+  }
+  const prevPortfolio = () => {
+    setAssets(previousPortfolios[previousPortfolioIndex]?.assets || []);
+    setWindowDays(previousPortfolios[previousPortfolioIndex]?.window_days || 252);
+    setFoundSymbol(null);
+    setMinAssetWeight(previousPortfolios[previousPortfolioIndex]?.constraints.min_asset_weight || 0.05);
+    setMaxAssetWeight(previousPortfolios[previousPortfolioIndex]?.constraints.max_asset_weight || 0.75);
+    setRiskFreeRate(previousPortfolios[previousPortfolioIndex]?.constraints.risk_free_rate || undefined);
+    setDisplayResult(showPrevious ? null : displayResult);
+    setError(null);
+    setInput('');
+    setPreviousPortfolioIndex((prev) => {
+      const prevIndex = prev - 1;
+      return prevIndex >= 0 ? prevIndex : previousPortfolios.length - 1; 
+    });
+  }
+
 
   const resetPortfolio = () => {
     setAssets([]);
@@ -499,9 +536,13 @@ const Main = () => {
                 {showPrevious  && (
                   <div className="mt-4 bg-gray-800 rounded-lg p-4 gap-x-4">
                     <div className="flex items-center justify-between">
-                      <FaStepBackward className="h-5 w-5 text-gray-400 hover:scale-130 duration-200 cursor-pointer" />
+                      <FaStepBackward 
+                      onClick={prevPortfolio}
+                      className="h-5 w-5 text-gray-400 hover:scale-130 duration-200 cursor-pointer" />
                       <span className="text-gray-100 text-m text-center flex-1">Previous Portfolios</span>
-                      <FaStepForward className="h-5 w-5 text-gray-400 hover:scale-130 duration-200 cursor-pointer" />
+                      <FaStepForward
+                       onClick={nextPortfolio}
+                       className="h-5 w-5 text-gray-400 hover:scale-130 duration-200 cursor-pointer" />
                     </div>
                   </div>
                 )}
