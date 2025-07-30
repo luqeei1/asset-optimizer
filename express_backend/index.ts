@@ -5,7 +5,19 @@ import dotenv from 'dotenv';
 import PortfolioModel from './models/PortfolioModel';
 import axios from 'axios';
 import { parse } from 'path';
-import Portfolio from './models/PortfolioModel'; 
+import User from './models/User';
+import jwt from 'jsonwebtoken';
+import bodyParser from 'body-parser';
+import bcrypt from 'bcrypt';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any; // need for adding request.user
+    }
+  }
+}
+
 
 const app = express();
 
@@ -16,8 +28,98 @@ app.use(express.json());
 let newsCache : any = null;
 let lastFetched : number = 0;
 const CACHE_TTL : number = 1000 * 60 * 10; 
+const JWT_SECRET = process.env.JWT_SECRET; 
 
 const url : string = process.env.MONGO_URL  || " ";
+
+app.post('/register', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password required' });
+    return;
+  }
+
+  try {
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      res.status(409).json({ error: 'Username already exists' });
+      return;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ username, password: hashedPassword });
+    await newUser.save();
+
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+app.post('/login', async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password required' });
+    return;
+  }
+
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      res.status(401).json({ error: 'Invalid username or password' });
+      return;
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      res.status(401).json({ error: 'Invalid username or password' });
+      return;
+    }
+
+    if (!JWT_SECRET) {
+      res.status(500).json({ error: 'JWT secret not configured' });
+      return;
+    }
+
+    const token = jwt.sign({ username: user.username }, JWT_SECRET as string, { expiresIn: '1h' });
+    res.status(200).json({ token });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+function authenticateToken(req: Request, res: Response, next: any): void {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        res.status(401).json({ error: 'Access token is missing or invalid' });
+        return;
+    }
+
+    if (!JWT_SECRET) {
+        res.status(500).json({ error: 'JWT secret is not configured on the server.' });
+        return;
+    }
+
+    jwt.verify(token, JWT_SECRET as string, (err: any, user: any) => {
+        if (err) {
+            res.status(403).json({ error: 'Invalid access token' });
+            return;
+        }
+        req.user = user;
+        next();
+    });
+}
+
+app.get('/portfolio', authenticateToken, async (req: Request, res: Response) => {
+    res.json({message: 'Welcome ' + req.user.username });
+})
 
 app.post('/optimize', async (req: Request, res: Response): Promise<void> => {
     const { assets, window_days, constraints } = req.body;
@@ -276,7 +378,7 @@ app.post('/save', async (req: Request, res: Response) => {
     }
 
     try {
-        const newPortfolio = new Portfolio(portfolioData);
+        const newPortfolio = new PortfolioModel(portfolioData);
         await newPortfolio.save();
         res.status(201).json(newPortfolio);
     } catch (error: any) {
