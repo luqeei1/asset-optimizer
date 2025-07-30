@@ -351,7 +351,7 @@ app.get('/portfolios', authenticateToken, async (req: Request, res: Response) =>
         console.error('Error fetching portfolios:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+}); // somehow this magically started working after i commited lol 
 
 mongoose
     .connect(url)
