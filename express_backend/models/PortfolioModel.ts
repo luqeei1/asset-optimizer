@@ -10,6 +10,7 @@ interface PortfolioDocument extends Document {
     assets: string[];
     window_days : number; 
     constraints: Constraints;
+    username: string;
 }
 
 const PortfolioSchema = new Schema<PortfolioDocument>({
@@ -19,7 +20,8 @@ const PortfolioSchema = new Schema<PortfolioDocument>({
         min_asset_weight: { type: Number, required: true },
         max_asset_weight: { type: Number, required: true },
         risk_free_rate: { type: Number, required: false }
-    }
+    },
+    username: { type: String, required: true }
 });
 
 const Portfolio = model<PortfolioDocument>('Portfolio', PortfolioSchema);

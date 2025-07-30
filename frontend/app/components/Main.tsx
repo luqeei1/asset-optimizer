@@ -80,7 +80,13 @@ const Main = () => {
 
   const fetchPreviousPortfolios = async () => {
     try {
-      const response = await fetch('http://localhost:5000/portfolios');
+
+      const token = localStorage.getItem('jwtToken');
+      const response = await fetch('http://localhost:5000/portfolios', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch previous portfolios');
       }
@@ -144,10 +150,19 @@ const Main = () => {
       }
     };
 
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      console.log('You must be logged in to save a portfolio');
+      return;
+    }
+    
     try {
       const response = await fetch('http://localhost:5000/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
 

@@ -169,16 +169,6 @@ app.post('/find', async (req, res) => {
         }
     }
 });
-app.get('/portfolio/list', async (req, res) => {
-    try {
-        const portfolios = await PortfolioModel_1.default.find({});
-        res.status(200).json(portfolios);
-    }
-    catch (error) {
-        console.error('Database error fetching portfolios:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
 app.get('/news', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 25;
@@ -274,47 +264,17 @@ app.get('/market_snapshot', async (req, res) => {
         }
     }
 });
-app.get('/portfolio/:id', async (req, res) => {
-    const portfolioId = req.params.id;
-    if (!portfolioId) {
-        res.status(400).json({ error: 'Portfolio ID is required' });
-        return;
-    }
-    try {
-        const portfolio = await PortfolioModel_1.default.findById(portfolioId);
-        if (!portfolio) {
-            res.status(404).json({ error: 'Portfolio not found' });
-        }
-        else {
-            res.status(200).json(portfolio);
-            console.log('Portfolio fetched successfully');
-        }
-    }
-    catch (error) {
-        console.error('Database error fetching portfolio:', error);
-        if (error.name === 'CastError') {
-            res.status(400).json({ error: 'Invalid portfolio ID format' });
-        }
-        else {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    }
-});
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
-app.post('/save', async (req, res) => {
+app.post('/save', authenticateToken, async (req, res) => {
     const portfolioData = req.body;
     if (!portfolioData) {
         res.status(400).json({ error: 'Portfolio data is required' });
         return;
     }
     try {
-        const newPortfolio = new PortfolioModel_1.default(portfolioData);
+        const newPortfolio = new PortfolioModel_1.default({
+            ...portfolioData,
+            username: req.user.username // safe now
+        });
         await newPortfolio.save();
         res.status(201).json(newPortfolio);
     }
@@ -323,9 +283,9 @@ app.post('/save', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-app.get('/portfolios', async (req, res) => {
+app.get('/portfolios', authenticateToken, async (req, res) => {
     try {
-        const portfolios = await PortfolioModel_1.default.find();
+        const portfolios = await PortfolioModel_1.default.find({ username: req.user.username });
         res.status(200).json(portfolios);
     }
     catch (error) {

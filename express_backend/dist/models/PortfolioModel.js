@@ -8,7 +8,8 @@ const PortfolioSchema = new mongoose_1.Schema({
         min_asset_weight: { type: Number, required: true },
         max_asset_weight: { type: Number, required: true },
         risk_free_rate: { type: Number, required: false }
-    }
+    },
+    username: { type: String, required: true }
 });
 const Portfolio = (0, mongoose_1.model)('Portfolio', PortfolioSchema);
 exports.default = Portfolio;

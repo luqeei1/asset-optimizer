@@ -83,7 +83,7 @@ app.post('/login', async (req: Request, res: Response) => {
       res.status(500).json({ error: 'JWT secret not configured' });
       return;
     }
-
+    
     const token = jwt.sign({ username: user.username }, JWT_SECRET as string, { expiresIn: '1h' });
     res.status(200).json({ token });
   } catch (err) {
@@ -214,15 +214,6 @@ app.post('/find', async (req: Request, res: Response): Promise<void> => {
     }
 });
 
-app.get('/portfolio/list', async (req, res) => {
-    try {
-        const portfolios = await PortfolioModel.find({}); 
-        res.status(200).json(portfolios);
-    } catch (error) {
-        console.error('Database error fetching portfolios:', error);
-        res.status(500).json({ error : 'Internal Server Error' });
-    }
-}); 
 
 app.get('/news', async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
@@ -331,45 +322,7 @@ app.get('/market_snapshot', async (req: Request, res: Response): Promise<void> =
     }
 });
 
-app.get('/portfolio/:id', async (req, res) => {
-    const portfolioId = req.params.id;
-    
-    if (!portfolioId) {
-        res.status(400).json({ error: 'Portfolio ID is required' });
-        return;
-    }
-
-    try {
-        const portfolio = await PortfolioModel.findById(portfolioId);
-        
-        if (!portfolio) {
-            res.status(404).json({ error: 'Portfolio not found'});
-        } else {
-            res.status(200).json(portfolio);
-            console.log('Portfolio fetched successfully');
-        }
-    } catch (error: any) {
-        console.error('Database error fetching portfolio:', error);
-        
-        
-        if (error.name === 'CastError') {
-            res.status(400).json({ error: 'Invalid portfolio ID format' });
-        } else {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    }
-}); 
-
-
-app.get('/health', (req: Request, res: Response) => {
-    res.status(200).json({ 
-        status: 'OK', 
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
-
-app.post('/save', async (req: Request, res: Response) => {
+app.post('/save', authenticateToken, async (req: Request, res: Response) => {
     const portfolioData = req.body;
 
     if (!portfolioData) {
@@ -378,7 +331,10 @@ app.post('/save', async (req: Request, res: Response) => {
     }
 
     try {
-        const newPortfolio = new PortfolioModel(portfolioData);
+        const newPortfolio = new PortfolioModel({
+            ...portfolioData,
+            username: req.user.username  // safe now
+        });
         await newPortfolio.save();
         res.status(201).json(newPortfolio);
     } catch (error: any) {
@@ -387,9 +343,9 @@ app.post('/save', async (req: Request, res: Response) => {
     }
 });
 
-app.get('/portfolios', async (req: Request, res: Response) => {
+app.get('/portfolios', authenticateToken, async (req: Request, res: Response) => {
     try {
-        const portfolios = await PortfolioModel.find();
+        const portfolios = await PortfolioModel.find({ username: req.user.username });
         res.status(200).json(portfolios);
     } catch (error: any) {
         console.error('Error fetching portfolios:', error);
