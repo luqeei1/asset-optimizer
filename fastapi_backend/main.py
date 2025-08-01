@@ -10,13 +10,17 @@ import requests
 import logging
 import os
 import dotenv
-
+from fastapi.middleware.cors import CORSMiddleware
 from yfinance import Ticker
 
 dotenv.load_dotenv()
 API_KEY = os.getenv("API_KEY")
 if not API_KEY:
     raise ValueError("API_KEY is not set in the environment variables")
+
+EXPRESS_BACKEND_URL = os.getenv("EXPRESS_BACKEND_URL")
+if not EXPRESS_BACKEND_URL:
+    raise ValueError("EXPRESS_BACKEND_URL is not set in the environment variables")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,6 +32,14 @@ logging.basicConfig(
 )
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[EXPRESS_BACKEND_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class PortfolioConstraints(BaseModel):
