@@ -29,7 +29,7 @@ let newsCache : any = null;
 let lastFetched : number = 0;
 const CACHE_TTL : number = 1000 * 60 * 10; 
 const JWT_SECRET = process.env.JWT_SECRET; 
-const FastAPI_URL = "https://asset-optimizer.onrender.com"; 
+const FastAPI_URL = "https://asset-optimizer.onrender.com";
 
 const url : string = process.env.MONGO_URL  || " ";
 

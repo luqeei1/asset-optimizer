@@ -33,6 +33,9 @@ const Historical = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+
+  
+
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
   const fetchHistoricalData = async (asset: { symbol: string; start: string; end: string; step: string }) => {
@@ -45,6 +48,19 @@ const Historical = () => {
     };
     
     try {
+      try{
+      const response = await fetch(`${expressBackendUrl}/find`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: data.symbol }),
+      });
+
+      data.symbol = (await response.json()).symbol;
+      console.log('Company symbol:', data.symbol);
+    } catch (error) {
+      console.error('Error fetching company symbol:', error);
+    }
+
       const response = await fetch(`${expressBackendUrl}/historical`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -79,6 +95,18 @@ const Historical = () => {
       step: asset.step,
     };
     try {
+
+      try {
+      const response = await fetch(`${expressBackendUrl}/find`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: data.symbol }),
+      });
+      data.symbol = (await response.json()).symbol; // Update the symbol (currently company name) with the fetched company symbol
+      console.log('Company symbol 2:', data.symbol);
+      } catch (error) {
+      console.error('Error fetching company symbol:', error);
+      }
       const response = await fetch(`${expressBackendUrl}/historical`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
