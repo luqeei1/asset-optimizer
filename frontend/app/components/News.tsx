@@ -19,13 +19,13 @@ const News = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
   const articlesPerPage = 3
 
   const fetchNews = async (query: string = '') => {
     setIsLoading(true)
     try {
-      
-      const url = `http://localhost:5000/news?page=1&limit=50${query ? `&query=${query}` : ''}`
+      const url = `${expressBackendUrl}/news?page=1&limit=50${query ? `&query=${query}` : ''}`
       const response = await fetch(url, {
         method: 'GET',
         headers: {

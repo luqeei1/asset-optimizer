@@ -31,8 +31,9 @@ const Historical = () => {
   const [historicalData2, setHistoricalData2] = useState<StockData[]>([]);
   const [symbol2, setSymbol2] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-
   const router = useRouter();
+
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
   const fetchHistoricalData = async (asset: { symbol: string; start: string; end: string; step: string }) => {
     setIsLoading(true);
@@ -44,7 +45,7 @@ const Historical = () => {
     };
     
     try {
-      const response = await fetch('http://localhost:5000/historical', {
+      const response = await fetch(`${expressBackendUrl}/historical`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -78,7 +79,7 @@ const Historical = () => {
       step: asset.step,
     };
     try {
-      const response = await fetch('http://localhost:5000/historical', {
+      const response = await fetch(`${expressBackendUrl}/historical`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),

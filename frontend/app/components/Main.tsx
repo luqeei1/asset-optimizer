@@ -66,6 +66,7 @@ const Main = () => {
   const [showPrevious, setShowPrevious] = useState(false);
   const [nextPortfolioIndex, setNextPortfolioIndex] = useState(0);
   const [previousPortfolioIndex, setPreviousPortfolioIndex] = useState(0);
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
   const [portfolio, setPortfolio] = useState<Portfolio>({
     assets: [],
     window_days: 252,
@@ -82,7 +83,7 @@ const Main = () => {
     try {
 
       const token = localStorage.getItem('jwtToken');
-      const response = await fetch('http://localhost:5000/portfolios', {
+      const response = await fetch(`${expressBackendUrl}/portfolios`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -102,7 +103,7 @@ const Main = () => {
   const FindAsset = async (companyName: string) => {
     try {
       setError(null);
-      const response = await fetch('http://localhost:5000/find', {
+      const response = await fetch(`${expressBackendUrl}/find`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: companyName }),
@@ -157,7 +158,7 @@ const Main = () => {
     }
     
     try {
-      const response = await fetch('http://localhost:5000/save', {
+      const response = await fetch(`${expressBackendUrl}/save`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -201,7 +202,7 @@ const Main = () => {
         }
       };
 
-      const response = await fetch('http://localhost:5000/optimize', {
+      const response = await fetch(`${expressBackendUrl}/optimize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -29,6 +29,7 @@ let newsCache : any = null;
 let lastFetched : number = 0;
 const CACHE_TTL : number = 1000 * 60 * 10; 
 const JWT_SECRET = process.env.JWT_SECRET; 
+const FastAPI_URL = process.env.FASTAPI_URL;
 
 const url : string = process.env.MONGO_URL  || " ";
 
@@ -142,9 +143,9 @@ app.post('/optimize', async (req: Request, res: Response): Promise<void> => {
     }
 
     try {
-        const FastAPIUrl = 'http://localhost:8000/optimize';
-        
-        
+        const FastAPIUrl = `${FastAPI_URL}/optimize`;
+
+
         const payload = {
             assets: assets,
             window_days: window_days,
@@ -188,7 +189,7 @@ app.post('/find', async (req: Request, res: Response): Promise<void> => {
     }
 
     try {
-        const fastAPIUrl = 'http://localhost:8000/find';
+        const fastAPIUrl = `${FastAPI_URL}/find`;
 
         const fastapiPayload = { name };
         console.log('Sending to FastAPI:', fastapiPayload);
@@ -225,7 +226,7 @@ app.get('/news', async (req: Request, res: Response): Promise<void> => {
         
         if(!newsCache || Date.now() - lastFetched > CACHE_TTL) {
             console.log('Cache expired or empty, fetching fresh news from FastAPI...');
-            const response = await axios.get('http://localhost:8000/news');
+            const response = await axios.get(`${FastAPI_URL}/news`);
             newsCache = response.data;
             lastFetched = Date.now();
             console.log(`Fetched ${newsCache.length} articles from FastAPI`);
@@ -262,7 +263,7 @@ app.post('/historical', async (req: Request, res: Response): Promise<void> => {
     }
 
     try {
-        const fastAPIUrl = `http://localhost:8000/historical`;
+        const fastAPIUrl = `${FastAPI_URL}/historical`;
 
         const payload = { symbol, start, end, step };
         console.log('Fetching historical data for:', payload);
@@ -296,7 +297,7 @@ app.post('/historical', async (req: Request, res: Response): Promise<void> => {
 
 app.get('/market_snapshot', async (req: Request, res: Response): Promise<void> => {
     try {
-        const fastAPIUrl = 'http://localhost:8000/market_snapshot';
+        const fastAPIUrl = `${FastAPI_URL}/market_snapshot`;
         const response = await axios.get(fastAPIUrl, { 
             headers: { 'User-Agent': 'Mozilla/5.0' } 
         });

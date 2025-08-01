@@ -10,6 +10,7 @@ const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,7 +18,7 @@ const Login = ({ onSwitch }: { onSwitch: () => void }) => {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/login', {
+      const res = await fetch(`${expressBackendUrl}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -92,6 +93,7 @@ const Register = ({ onSwitch }: { onSwitch: () => void }) => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +106,7 @@ const Register = ({ onSwitch }: { onSwitch: () => void }) => {
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/register', {
+      const res = await fetch(`${expressBackendUrl}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
