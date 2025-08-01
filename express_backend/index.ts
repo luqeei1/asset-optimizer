@@ -33,6 +33,29 @@ const FastAPI_URL = "https://asset-optimizer.onrender.com";
 
 const url : string = process.env.MONGO_URL  || " ";
 
+app.get('/protected-data', (req: Request, res: Response) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    res.status(401).json({ error: "Missing token!" });
+    return;
+  }
+
+  if (!JWT_SECRET) {
+    res.status(500).json({ error: "JWT secret not configured" });
+    return;
+  }
+
+  jwt.verify(token, JWT_SECRET as string, (err, user) => {
+    if (err) {
+      res.status(403).json({ error: "Invalid token!" });
+      return;
+    }
+    res.json({ data: "Protected content!" });
+  });
+});
+
+
 app.post('/register', async (req: Request, res: Response) => {
   const { username, password } = req.body;
   if (!username || !password) {

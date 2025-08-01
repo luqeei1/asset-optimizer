@@ -22,6 +22,18 @@ const News = () => {
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
   const articlesPerPage = 3
 
+  const router = useRouter()
+
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+          router.push('/Home'); // just made it so that if ur not signed in, you get directed back to login page (Home)
+        } 
+      }
+    }, [router]);
+
+
   const fetchNews = async (query: string = '') => {
     setIsLoading(true)
     try {

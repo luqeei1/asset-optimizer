@@ -20,8 +20,26 @@ let newsCache = null;
 let lastFetched = 0;
 const CACHE_TTL = 1000 * 60 * 10;
 const JWT_SECRET = process.env.JWT_SECRET;
-const FastAPI_URL = "http://localhost:8000"; // Update with your FastAPI URL
+const FastAPI_URL = "http://localhost:8000";
 const url = process.env.MONGO_URL || " ";
+app.get('/protected-data', (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        res.status(401).json({ error: "Missing token!" });
+        return;
+    }
+    if (!JWT_SECRET) {
+        res.status(500).json({ error: "JWT secret not configured" });
+        return;
+    }
+    jsonwebtoken_1.default.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            res.status(403).json({ error: "Invalid token!" });
+            return;
+        }
+        res.json({ data: "Protected content!" });
+    });
+});
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {

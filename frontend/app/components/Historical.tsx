@@ -37,6 +37,16 @@ const Historical = () => {
 
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
+   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('jwtToken');
+      if (!token) {
+        router.push('/Home'); // just made it so that if ur not signed in, you get directed back to login page (Home)
+      } 
+    }
+  }, [router]);
+
+
   
   useEffect(() => {
     if (historicalData.length > 0 || historicalData2.length > 0) {

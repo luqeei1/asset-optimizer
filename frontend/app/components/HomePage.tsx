@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion'; 
+import { useEffect } from 'react';
 
 const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const router = useRouter();
@@ -185,6 +186,15 @@ const Register = ({ onSwitch }: { onSwitch: () => void }) => {
 const HomePage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('jwtToken');
+        if (!token) {
+          router.push('/Home'); // just made it so that if ur not signed in, you get directed back to login page (Home)
+        } 
+      }
+    }, [router]);
 
   return (
     <div className='flex flex-col min-h-screen bg-black px-4 overflow-x-hidden'>

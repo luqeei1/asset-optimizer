@@ -79,6 +79,7 @@ const Main = () => {
 
   const router = useRouter();
 
+
   const fetchPreviousPortfolios = async () => {
     try {
 
@@ -223,11 +224,28 @@ const Main = () => {
     }
   };
 
-  useEffect( () => {
-    fetchPreviousPortfolios();
-    setNextPortfolioIndex(1);
-    setPreviousPortfolioIndex(previousPortfolios.length - 1);
-  }, []);
+  useEffect(() => {
+  const initialize = async () => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('jwtToken');
+      if (!token) {
+        router.push('/Home');
+        return; 
+      }
+    }
+
+    
+    try {
+      await fetchPreviousPortfolios();
+      setNextPortfolioIndex(1);
+      setPreviousPortfolioIndex(previousPortfolios.length - 1);
+    } catch (error) {
+      console.error('Failed to load portfolios:', error);
+    }
+  };
+
+  initialize(); 
+}, []); 
 
   const nextPortfolio = () => {
     setAssets(previousPortfolios[nextPortfolioIndex]?.assets || []);
