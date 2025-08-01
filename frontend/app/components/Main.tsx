@@ -409,11 +409,10 @@ const Main = () => {
                 <div className="space-y-1">
                   <label className="block text-sm font-medium text-gray-400">Window Days</label>
                   <input
-                    type="number"
+                    type="text"
                     value={windowDays}
-                    onChange={(e) => setWindowDays(Math.max(1, Number(e.target.value)))}
-                    placeholder="252"
-                    min="1"
+                    onChange={(e) => setWindowDays(Number(e.target.value))}
+                    placeholder="0"
                     className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500">Historical data period (252 = ~1 year)</p>
@@ -439,11 +438,17 @@ const Main = () => {
                   <label className="block text-sm font-medium text-gray-400">Min Asset Weight (%)</label>
                   <input
                     type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={minAssetWeight * 100}
-                    onChange={(e) => setMinAssetWeight(Math.max(0, Math.min(1, Number(e.target.value) / 100)))}
+                    step="0.1"
+                    value={(minAssetWeight * 100).toFixed(1)} 
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) {
+                        setMinAssetWeight(Math.round(value * 10) / 1000);
+                      }
+                      if(value < 0.1){
+                        setMinAssetWeight(0.001);
+                      }
+                    }}
                     placeholder="5"
                     className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
@@ -454,16 +459,23 @@ const Main = () => {
                   <label className="block text-sm font-medium text-gray-400">Max Asset Weight (%)</label>
                   <input
                     type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    value={maxAssetWeight * 100}
-                    onChange={(e) => setMaxAssetWeight(Math.max(0, Math.min(1, Number(e.target.value) / 100)))}
+                    step="0.1"
+                    value={(maxAssetWeight * 100).toFixed(1)} 
+                    onChange={(e) => {
+                      const value = parseFloat(e.target.value);
+                      if (!isNaN(value)) {
+                        setMaxAssetWeight(Math.round(value * 10) / 1000);
+                      }
+                      if (value < minAssetWeight * 100) {
+                        setMaxAssetWeight(minAssetWeight);
+                      }
+                    }}
                     placeholder="75"
                     className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                   <p className="text-xs text-gray-500">Maximum allocation per asset</p>
                 </div>
+
               </div>
             </motion.div>
           </div>

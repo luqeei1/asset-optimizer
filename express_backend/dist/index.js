@@ -20,6 +20,7 @@ let newsCache = null;
 let lastFetched = 0;
 const CACHE_TTL = 1000 * 60 * 10;
 const JWT_SECRET = process.env.JWT_SECRET;
+const FastAPI_URL = "https://asset-optimizer.onrender.com";
 const url = process.env.MONGO_URL || " ";
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
@@ -111,7 +112,7 @@ app.post('/optimize', async (req, res) => {
         return;
     }
     try {
-        const FastAPIUrl = 'http://localhost:8000/optimize';
+        const FastAPIUrl = `${FastAPI_URL}/optimize`;
         const payload = {
             assets: assets,
             window_days: window_days,
@@ -147,7 +148,7 @@ app.post('/find', async (req, res) => {
         return;
     }
     try {
-        const fastAPIUrl = 'http://localhost:8000/find';
+        const fastAPIUrl = `${FastAPI_URL}/find`;
         const fastapiPayload = { name };
         console.log('Sending to FastAPI:', fastapiPayload);
         const response = await axios_1.default.post(fastAPIUrl, fastapiPayload);
@@ -177,7 +178,7 @@ app.get('/news', async (req, res) => {
     try {
         if (!newsCache || Date.now() - lastFetched > CACHE_TTL) {
             console.log('Cache expired or empty, fetching fresh news from FastAPI...');
-            const response = await axios_1.default.get('http://localhost:8000/news');
+            const response = await axios_1.default.get(`${FastAPI_URL}/news`);
             newsCache = response.data;
             lastFetched = Date.now();
             console.log(`Fetched ${newsCache.length} articles from FastAPI`);
@@ -211,7 +212,7 @@ app.post('/historical', async (req, res) => {
         return;
     }
     try {
-        const fastAPIUrl = `http://localhost:8000/historical`;
+        const fastAPIUrl = `${FastAPI_URL}/historical`;
         const payload = { symbol, start, end, step };
         console.log('Fetching historical data for:', payload);
         const response = await axios_1.default.post(fastAPIUrl, payload, { headers: { 'User-Agent': 'Mozilla/5.0' } });
@@ -239,7 +240,7 @@ app.post('/historical', async (req, res) => {
 });
 app.get('/market_snapshot', async (req, res) => {
     try {
-        const fastAPIUrl = 'http://localhost:8000/market_snapshot';
+        const fastAPIUrl = `${FastAPI_URL}/market_snapshot`;
         const response = await axios_1.default.get(fastAPIUrl, {
             headers: { 'User-Agent': 'Mozilla/5.0' }
         });
@@ -292,7 +293,7 @@ app.get('/portfolios', authenticateToken, async (req, res) => {
         console.error('Error fetching portfolios:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+}); // somehow this magically started working after i commited lol 
 mongoose_1.default
     .connect(url)
     .then(() => {
