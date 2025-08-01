@@ -310,15 +310,6 @@ const Main = () => {
               Maximize Sharpe ratio with optimized asset allocation
             </p>
           </motion.div>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => router.push('/')}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"
-          >
-            <FiArrowLeft className="h-5 w-5" />
-            Return
-          </motion.button>
         </div>
 
         {error && (
