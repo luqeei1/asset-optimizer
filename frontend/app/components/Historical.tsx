@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend} from 'chart.js';
 import { Line } from 'react-chartjs-2';
@@ -31,15 +31,23 @@ const Historical = () => {
   const [historicalData2, setHistoricalData2] = useState<StockData[]>([]);
   const [symbol2, setSymbol2] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [error2, setError2] = useState<string | null>(null);
   const router = useRouter();
-
-
-  
 
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
+  
+  useEffect(() => {
+    if (historicalData.length > 0 || historicalData2.length > 0) {
+      setHistoricalData([]);
+      setHistoricalData2([]);
+    }
+  }, [symbol, symbol2, startDate, endDate, step]);
+
   const fetchHistoricalData = async (asset: { symbol: string; start: string; end: string; step: string }) => {
     setIsLoading(true);
+    setError(null);
     const data = {
       symbol: asset.symbol,
       start: asset.start,
@@ -48,25 +56,32 @@ const Historical = () => {
     };
     
     try {
-      try{
-      const response = await fetch(`${expressBackendUrl}/find`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: data.symbol }),
-      });
+      try {
+        const response = await fetch(`${expressBackendUrl}/find`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: data.symbol }),
+        });
 
-      data.symbol = (await response.json()).symbol;
-      console.log('Company symbol:', data.symbol);
-    } catch (error) {
-      console.error('Error fetching company symbol:', error);
-    }
+        const result = await response.json();
+        
+        data.symbol = result.symbol;
+        console.log('Company symbol:', data.symbol);
+      } catch (error) {
+        setError('Invalid company name - please check your input');
+        console.error('Error fetching company symbol:', error);
+      }
 
       const response = await fetch(`${expressBackendUrl}/historical`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Network response was not ok');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch historical data');
+      }
+      
       const result = await response.json();
       const transformed: StockData[] = result.map((item: any) => ({
         date: item.Date,
@@ -80,7 +95,8 @@ const Historical = () => {
       }));
       setHistoricalData(transformed);
     } catch (error) {
-      console.error('Error fetching historical data:', error);
+      setError('Failed to load historical data - please try again');
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -88,31 +104,44 @@ const Historical = () => {
 
   const fetchHistoricalData2 = async (asset: { symbol: string; start: string; end: string; step: string }) => {
     setIsLoading(true);
+    setError2(null);
     const data = {
       symbol: asset.symbol,
       start: asset.start,
       end: asset.end,
       step: asset.step,
     };
+    
     try {
-
       try {
-      const response = await fetch(`${expressBackendUrl}/find`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: data.symbol }),
-      });
-      data.symbol = (await response.json()).symbol; // Update the symbol (currently company name) with the fetched company symbol
-      console.log('Company symbol 2:', data.symbol);
+        const response = await fetch(`${expressBackendUrl}/find`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: data.symbol }),
+        });
+
+        
+
+        const result = await response.json();
+        
+
+        data.symbol = result.symbol;
+        console.log('Company symbol 2:', data.symbol);
       } catch (error) {
-      console.error('Error fetching company symbol:', error);
+        setError2('Invalid company name - please check your input');
+        return;
       }
+
       const response = await fetch(`${expressBackendUrl}/historical`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      if (!response.ok) throw new Error('Network response was not ok');
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch historical data');
+      }
+      
       const result = await response.json();
       const transformed: StockData[] = result.map((item: any) => ({
         date: item.Date,
@@ -126,7 +155,8 @@ const Historical = () => {
       }));
       setHistoricalData2(transformed);
     } catch (error) {
-      console.error('Error fetching historical data:', error);
+      setError2('Failed to load historical data - please try again');
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -265,7 +295,7 @@ const Historical = () => {
     },
   }
 
-  return (
+ return (
     <div className="min-h-screen bg-black text-white px-4 py-8 font-sans">
       <div className="max-w-7xl mx-auto">
         <NavBar />
@@ -295,9 +325,7 @@ const Historical = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
           <div className="space-y-6">
-            
             <motion.div 
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -311,78 +339,99 @@ const Historical = () => {
                 </span>
               </div>
               
-              <div className="flex gap-2 mb-4">
-                <input
-                  type="text"
-                  value={symbol}
-                  onChange={(e) => setSymbol(e.target.value)}
-                  placeholder="First symbol"
-                  className="flex-1 px-4 py-2.5 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent w-3/4"
-                />
-                <input
-                  type="text"
-                  value={symbol2}
-                  onChange={(e) => setSymbol2(e.target.value)}
-                  placeholder="Second symbol"
-                  className="flex-1 px-4 py-2.5 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent w-3/4"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Start Date</label>
-                  <input
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    type="date"
-                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={symbol}
+                        onChange={(e) => {
+                          setSymbol(e.target.value);
+                          setError(null);
+                        }}
+                        placeholder="First symbol"
+                        className="w-full px-4 py-2.5 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      />
+                      {error && (
+                        <p className="mt-1 text-sm text-red-500">{error}</p>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={symbol2}
+                        onChange={(e) => {
+                          setSymbol2(e.target.value);
+                          setError2(null);
+                        }}
+                        placeholder="Second symbol"
+                        className="w-full px-4 py-2.5 bg-gray-800 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      />
+                      {error2 && (
+                        <p className="mt-1 text-sm text-red-500">{error2}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">End Date</label>
-                  <input
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    type="date"
-                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
-                  />
-                </div>
-              </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-400 mb-1">Time Interval</label>
-                <select
-                  value={step}
-                  onChange={(e) => setStep(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Start Date</label>
+                    <input
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      type="date"
+                      className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">End Date</label>
+                    <input
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      type="date"
+                      className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Time Interval</label>
+                  <select
+                    value={step}
+                    onChange={(e) => setStep(e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-800 text-white rounded-lg"
+                  >
+                    <option value="">Select interval</option>
+                    <option value="1d">Daily</option>
+                    <option value="1wk">Weekly</option>
+                    <option value="1mo">Monthly</option>
+                  </select>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setError(null);
+                    setError2(null);
+                    if (!symbol || !symbol2 || !startDate || !endDate || !step) {
+                      setError('Please fill in all fields');
+                      return;
+                    }
+                    const newAsset = { symbol, start: startDate, end: endDate, step };
+                    const newAsset2 = { symbol: symbol2, start: startDate, end: endDate, step };
+                    setAssets([newAsset, newAsset2]);
+                  }}
+                  className="w-full px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium"
                 >
-                  <option value="">Select interval</option>
-                  <option value="1d">Daily</option>
-                  <option value="1wk">Weekly</option>
-                  <option value="1mo">Monthly</option>
-                </select>
+                  Add Stocks to Compare
+                </motion.button>
               </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (!symbol || !symbol2 || !startDate || !endDate || !step) {
-                    alert('Please fill in all fields');
-                    return;
-                  }
-                  const newAsset = { symbol, start: startDate, end: endDate, step };
-                  const newAsset2 = { symbol: symbol2, start: startDate, end: endDate, step };
-                  setAssets([newAsset, newAsset2]);
-                }}
-                className="w-full px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium"
-              >
-                Add Stocks to Compare
-              </motion.button>
             </motion.div>
 
-            
             <motion.div 
               initial={{ opacity: 0, x: -100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -400,9 +449,7 @@ const Historical = () => {
             </motion.div>
           </div>
 
-         
           <div className="lg:col-span-2 space-y-6">
-           
             <motion.div 
               initial={{ opacity: 0, x: 100 }}
               animate={{ opacity: 1, x: 0 }}
@@ -436,7 +483,7 @@ const Historical = () => {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     if (assets.length === 0) {
-                      alert('Please add stocks to compare first');
+                      setError('Please add stocks to compare first');
                       return;
                     }
                     fetchHistoricalData(assets[0]);
@@ -463,7 +510,6 @@ const Historical = () => {
               </div>
             </motion.div>
 
-            
             {historicalData.length > 0 && historicalData2.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
