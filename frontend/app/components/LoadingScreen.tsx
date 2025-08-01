@@ -2,8 +2,14 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 
 const LoadingScreen = () => {
+
+  useEffect(() => {
+      localStorage.removeItem('jwtToken'); // Clear token on page load so user has to log in again for security reasons 
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black px-4">
       <motion.h1

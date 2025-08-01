@@ -105,7 +105,7 @@ const Historical = () => {
       }));
       setHistoricalData(transformed);
     } catch (error) {
-      setError('Failed to load historical data - please try again');
+      setError('Not a valid company name');
       return;
     } finally {
       setIsLoading(false);
@@ -165,7 +165,7 @@ const Historical = () => {
       }));
       setHistoricalData2(transformed);
     } catch (error) {
-      setError2('Failed to load historical data - please try again');
+      setError2('Not a valid company name');
       return;
     } finally {
       setIsLoading(false);

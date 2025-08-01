@@ -188,13 +188,8 @@ const HomePage = () => {
   const router = useRouter();
 
   useEffect(() => {
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('jwtToken');
-        if (!token) {
-          router.push('/Home'); // just made it so that if ur not signed in, you get directed back to login page (Home)
-        } 
-      }
-    }, [router]);
+    localStorage.removeItem('jwtToken'); // Clear token on page load so user has to log in again for security reasons 
+    }, []);
 
   return (
     <div className='flex flex-col min-h-screen bg-black px-4 overflow-x-hidden'>
@@ -208,7 +203,7 @@ const HomePage = () => {
         Return
       </motion.button>
 
-      <div className="flex flex-col items-center justify-center mt-16">
+      <div className="flex flex-col items-center justify-center ">
         <motion.h1
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -222,21 +217,18 @@ const HomePage = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1 }}
-          className='text-xl font-medium text-white mb-8 max-w-3xl text-center mt-4'
+          className='text-xl font-medium text-white mb-4 max-w-3xl text-center mt-4'
         >
-          SharpeOpt is a full stack app written by Akarsh Gopalam. It serves the purpose of optimizing a given portfolio of assets using the Sharpe Ratio. 
-          The output of which are the weights, risk, and return of the optimized portfolio. In addition, the calculated Sharpe Ratio can be seen for those
-          who wish to evaluate the performance of their investments. 
-
+          SharpeOpt is a full stack app that serves the purpose of optimizing a given portfolio of assets using the Sharpe Ratio.In addition, the calculated Sharpe Ratio can be seen for those
+          who wish to evaluate the performance of their investments. SharpeOpt provides other features such as viewing historical data of stocks, and reading the latest news articles related to the stock market.
           SharpeOpt is written using NextJS, TypeScript and TailWindCSS on the frontend with ExpressJS, TypeScript on the backend. In addition, Python FastAPI
-          is used to act as a micro-service for mathematical calculations and minimization. To further understand the product of SharpeOpt, visit its codebase found 
-          Akarsh's GitHub. 
+          is used to act as a micro-service for mathematical calculations and minimization. To further understand the product of SharpeOpt, visit its codebase.
         </motion.p>
       </div>
 
       <motion.div initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 2 }} className="flex justify-center mt-8 mb-16">
+          transition={{ duration: 1, delay: 2 }} className="flex justify-center mt-4 mb-16">
         {isLogin ? (
           <Login onSwitch={() => setIsLogin(false)} />
         ) : (

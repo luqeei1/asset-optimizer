@@ -104,7 +104,7 @@ const News = () => {
           </motion.div>
         </div>
       </header>
-      <section className="bg-gradient-to-r from-gray-900 to-black py-12">
+      <section className="bg-gradient-to-r from-gray-900 to-black py-6">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, x: -100 }}
@@ -128,7 +128,7 @@ const News = () => {
               <span className="text-red-500">Latest</span> Financial News
             </h3>
             <div className="flex items-center space-x-4">
-              {/* Page indicator */}
+              
               <span className="text-gray-400 text-sm">
                 Page {currentPage} of {totalPages} ({allArticles.length} total articles)
               </span>
@@ -206,7 +206,7 @@ const News = () => {
 
           
           {totalPages > 1 && (
-            <div className="flex justify-center mt-8 space-x-2">
+            <div className="flex justify-center mt-6 space-x-2">
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((pageNum) => (
                 <button
                   key={pageNum}
