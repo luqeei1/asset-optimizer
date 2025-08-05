@@ -19,7 +19,7 @@ const News = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com'
   const articlesPerPage = 3
   const router = useRouter()
 
