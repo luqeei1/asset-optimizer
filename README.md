@@ -1,13 +1,13 @@
 # 📈 Welcome To SharpeOpt ( An Asset Optimization Using Sharpe Ratio ) 
 
-Welcome to my full-stack asset optimization application!  
+Welcome to my full-stack asset optimization application, SharpeOpt!  
 This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
 
 - 📰 A **news** section with financial updates  
 - ⏰ A **stock opening/closing time comparator**  
 - 💼 A **portfolio optimizer** using the Sharpe ratio
 
-**NOTE**: SharpeOpt now supports accounts, login and register have become available in my latest update!!!
+**NOTE**: SharpeOpt has now been deployed and complete! Check out SharpeOpt at using the Vercel link!!!!!
 
 ---
 
