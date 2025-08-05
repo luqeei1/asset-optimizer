@@ -19,6 +19,9 @@ declare global {
 }
 
 
+const PORT = process.env.PORT || 5000;
+
+
 const app = express();
 
 dotenv.config(); 
@@ -377,15 +380,18 @@ app.get('/portfolios', authenticateToken, async (req: Request, res: Response) =>
     }
 }); // somehow this magically started working after i commited lol 
 
+
+
+
 mongoose
-    .connect(url)
-    .then(() => {
-        app.listen(5000, () => {
-            console.log('Server is running on port 5000');
-            console.log('Connected to MongoDB successfully');
-        });
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB:', err);
-        process.exit(1);
+  .connect(url)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      console.log('Connected to MongoDB successfully');
     });
+  })
+  .catch((err) => {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
+  });
