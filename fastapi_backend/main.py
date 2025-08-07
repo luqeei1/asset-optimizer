@@ -252,3 +252,7 @@ async def get_market_news():
     except Exception as e:
         logging.error(f"News fetch error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/")
+async def startup():
+    return {"message": "Asset Optimizer API is running!"}

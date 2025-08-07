@@ -186,10 +186,22 @@ const Register = ({ onSwitch }: { onSwitch: () => void }) => {
 const HomePage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const router = useRouter();
+  const fastapiurl = 'https://asset-optimizer.onrender.com';
 
   useEffect(() => {
     localStorage.removeItem('jwtToken'); // Clear token on page load so user has to log in again for security reasons 
-    }, []);
+    const ping = async () => {
+      try {
+        const response = await fetch(`${fastapiurl}/`);
+        if (!response.ok) {
+          throw new Error('Failed to ping FastAPI server');
+        }
+      } catch (error) {
+        console.error('Error pinging FastAPI server:', error);
+      }
+    };
+    ping();
+  }, []);
 
   return (
     <div className='flex flex-col min-h-screen bg-black px-4 overflow-x-hidden'>
