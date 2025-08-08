@@ -563,6 +563,8 @@ const Main = () => {
                       const value = parseFloat(e.target.value);
                       if (!isNaN(value)) {
                         setMaxAssetWeight(Math.round(value * 10) / 1000);
+                      } if (value > 100){
+                        setMaxAssetWeight(1);
                       }
                       if (value < minAssetWeight * 100) {
                         setMaxAssetWeight(minAssetWeight);
