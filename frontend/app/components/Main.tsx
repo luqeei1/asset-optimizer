@@ -133,6 +133,23 @@ const Main = () => {
     }
   };
 
+  const isDuplicatePortfolio = (newPortfolio: Portfolio): boolean => {
+    return previousPortfolios.some(existing => {
+     
+      const existingAssets = [...existing.assets].sort();
+      const newAssets = [...newPortfolio.assets].sort();
+      const assetsMatch = JSON.stringify(existingAssets) === JSON.stringify(newAssets);
+      
+      
+      const windowMatch = existing.window_days === newPortfolio.window_days;
+      const minWeightMatch = existing.constraints.min_asset_weight === newPortfolio.constraints.min_asset_weight;
+      const maxWeightMatch = existing.constraints.max_asset_weight === newPortfolio.constraints.max_asset_weight;
+      const riskFreeMatch = existing.constraints.risk_free_rate === newPortfolio.constraints.risk_free_rate;
+      
+      return assetsMatch && windowMatch && minWeightMatch && maxWeightMatch && riskFreeMatch;
+    });
+  };
+
   const savetoMongoDB = async () => {
     if (assets.length < 2) {
       setError('Please add at least 2 assets to save the portfolio');
@@ -148,6 +165,12 @@ const Main = () => {
         risk_free_rate: riskFreeRate
       }
     };
+
+    
+    if (isDuplicatePortfolio(payload)) {
+      setError('This portfolio configuration already exists in your saved portfolios');
+      return;
+    }
 
     const token = localStorage.getItem('jwtToken');
     if (!token) {
@@ -177,9 +200,7 @@ const Main = () => {
       console.log('Portfolio saved:', data);
       setSaveSuccess(true);
       
-      
       await fetchPreviousPortfolios();
-      
       
       setTimeout(() => {
         setSaveSuccess(false);
