@@ -12,12 +12,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 type StockData = {
   date: string;
   open: number;
-  high: number;
-  low: number;
   close: number;
-  volume: number;
-  dividends: number;
-  stockSplits: number;
 };
 
 const Historical = () => {
@@ -96,12 +91,7 @@ const Historical = () => {
       const transformed: StockData[] = result.map((item: any) => ({
         date: item.Date,
         open: item.Open,
-        high: item.High,
-        low: item.Low,
         close: item.Close,
-        volume: item.Volume,
-        dividends: item.Dividends,
-        stockSplits: item['Stock Splits'],
       }));
       setHistoricalData(transformed);
     } catch (error) {
@@ -156,12 +146,7 @@ const Historical = () => {
       const transformed: StockData[] = result.map((item: any) => ({
         date: item.Date,
         open: item.Open,
-        high: item.High,
-        low: item.Low,
         close: item.Close,
-        volume: item.Volume,
-        dividends: item.Dividends,
-        stockSplits: item['Stock Splits'],
       }));
       setHistoricalData2(transformed);
     } catch (error) {
