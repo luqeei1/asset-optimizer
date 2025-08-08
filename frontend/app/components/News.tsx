@@ -18,7 +18,6 @@ const News = () => {
   const [allArticles, setAllArticles] = useState<Article[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com'
   const articlesPerPage = 3
   const router = useRouter()
@@ -32,10 +31,10 @@ const News = () => {
     }
   }, [router]);
 
-  const fetchNews = async (query: string = '') => {
+  const fetchNews = async () => {
     setIsLoading(true)
     try {
-      const url = `${expressBackendUrl}/news?page=1&limit=50${query ? `&query=${query}` : ''}`
+      const url = `${expressBackendUrl}/news`
       const response = await fetch(url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -62,7 +61,7 @@ const News = () => {
   const totalPages = Math.ceil(allArticles.length / articlesPerPage)
 
   useEffect(() => {
-    fetchNews(searchQuery)
+    fetchNews()
   }, [])
 
   const handlePrevious = () => setCurrentPage(prev => Math.max(1, prev - 1))
@@ -82,9 +81,9 @@ const News = () => {
           <p className="text-gray-400 mt-4">Stay updated with the latest market trends</p>
         </div>
 
-        {/* News Content */}
+        
         <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
-          {/* Pagination Controls */}
+          
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-semibold text-white">Latest Articles</h3>
             <div className="flex items-center space-x-4">
@@ -110,7 +109,7 @@ const News = () => {
             </div>
           </div>
 
-          {/* Articles Grid */}
+         
           {isLoading ? (
             <div className="flex justify-center items-center h-32">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
@@ -160,10 +159,10 @@ const News = () => {
             </div>
           )}
 
-          {/* Quick Page Navigation */}
+          
           {totalPages > 1 && (
             <div className="flex justify-center mt-6 space-x-2">
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map((pageNum) => (
+              {Array.from({ length: Math.min(totalPages, 10) }, (_, i) => i + 1).map((pageNum) => (
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
@@ -176,21 +175,6 @@ const News = () => {
                   {pageNum}
                 </button>
               ))}
-              {totalPages > 5 && (
-                <>
-                  <span className="text-gray-400 text-sm">...</span>
-                  <button
-                    onClick={() => setCurrentPage(totalPages)}
-                    className={`px-2 py-1 rounded text-sm transition ${
-                      currentPage === totalPages 
-                        ? 'bg-red-500 text-white' 
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                    }`}
-                  >
-                    {totalPages}
-                  </button>
-                </>
-              )}
             </div>
           )}
         </div>

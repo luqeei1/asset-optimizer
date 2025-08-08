@@ -30,7 +30,7 @@ app.use(express.json());
 
 let newsCache : any = null;
 let lastFetched : number = 0;
-const CACHE_TTL : number = 1000 * 60 * 10; 
+const CACHE_TTL : number = 1000 * 60 * 20; // 20 minutes
 const JWT_SECRET = process.env.JWT_SECRET; 
 const FastAPI_URL = "https://asset-optimizer.onrender.com";
 
@@ -243,10 +243,6 @@ app.post('/find', async (req: Request, res: Response): Promise<void> => {
 
 
 app.get('/news', async (req: Request, res: Response): Promise<void> => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 25; 
-    const start = (page - 1) * limit;
-    const end = page * limit;
 
     try {
         
@@ -260,14 +256,11 @@ app.get('/news', async (req: Request, res: Response): Promise<void> => {
             console.log('Using cached news data');
         }
         
-        const newsdata = newsCache.slice(start, end);
-        console.log(`Returning ${newsdata.length} articles for page ${page}`);
+        const newsdata = newsCache
+        console.log(`Returning ${newsdata.length} articles`);
         
         res.status(200).json({
-            page,
-            limit,
             total: newsCache.length,
-            totalPages: Math.ceil(newsCache.length / limit),
             results: newsdata,
             lastUpdated: new Date(lastFetched).toISOString(),
             cached: Date.now() - lastFetched < CACHE_TTL

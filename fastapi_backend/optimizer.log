@@ -80,3 +80,8 @@ Optimization Results:
 2025-07-22 21:06:30,752 - ERROR - $NVIDIA: possibly delisted; no timezone found
 2025-07-22 21:06:30,909 - ERROR - $APPLE: possibly delisted; no timezone found
 2025-07-22 21:06:30,914 - ERROR - $NVIDIA: possibly delisted; no timezone found
+2025-08-08 01:07:28,016 - ERROR - 
+2 Failed downloads:
+2025-08-08 01:07:28,017 - ERROR - ['JPM']: Timeout('Failed to perform, curl: (28) Connection timed out after 10010 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+2025-08-08 01:07:28,017 - ERROR - ['JNJ']: Timeout('Failed to perform, curl: (28) Connection timed out after 10003 milliseconds. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.')
+2025-08-08 01:07:28,029 - ERROR - Optimization error: Some assets may not have enough data.

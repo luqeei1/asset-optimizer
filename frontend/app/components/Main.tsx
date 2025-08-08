@@ -67,15 +67,6 @@ const Main = () => {
   const [nextPortfolioIndex, setNextPortfolioIndex] = useState(0);
   const [previousPortfolioIndex, setPreviousPortfolioIndex] = useState(0);
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
-  const [portfolio, setPortfolio] = useState<Portfolio>({
-    assets: [],
-    window_days: 252,
-    constraints: {
-      min_asset_weight: 0.05,
-      max_asset_weight: 0.75,
-      risk_free_rate: undefined
-    }
-  });
 
   const router = useRouter();
 
@@ -175,7 +166,6 @@ const Main = () => {
 
       const data = await response.json();
       console.log('Portfolio saved:', data);
-      setPortfolio(payload);
     } catch (error) {
       console.error('Error saving portfolio:', error);
       setError(error instanceof Error ? error.message : 'Failed to save portfolio');

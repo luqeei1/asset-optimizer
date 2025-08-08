@@ -12,15 +12,16 @@ const axios_1 = __importDefault(require("axios"));
 const User_1 = __importDefault(require("./models/User"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const PORT = process.env.PORT || 5000;
 const app = (0, express_1.default)();
 dotenv_1.default.config();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 let newsCache = null;
 let lastFetched = 0;
-const CACHE_TTL = 1000 * 60 * 10;
+const CACHE_TTL = 1000 * 60 * 20; // 20 minutes
 const JWT_SECRET = process.env.JWT_SECRET;
-const FastAPI_URL = "https://asset-optimizer.onrender.com";
+const FastAPI_URL = "http://localhost:8000";
 const url = process.env.MONGO_URL || " ";
 app.get('/protected-data', (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -189,10 +190,6 @@ app.post('/find', async (req, res) => {
     }
 });
 app.get('/news', async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 25;
-    const start = (page - 1) * limit;
-    const end = page * limit;
     try {
         if (!newsCache || Date.now() - lastFetched > CACHE_TTL) {
             console.log('Cache expired or empty, fetching fresh news from FastAPI...');
@@ -204,13 +201,10 @@ app.get('/news', async (req, res) => {
         else {
             console.log('Using cached news data');
         }
-        const newsdata = newsCache.slice(start, end);
-        console.log(`Returning ${newsdata.length} articles for page ${page}`);
+        const newsdata = newsCache;
+        console.log(`Returning ${newsdata.length} articles`);
         res.status(200).json({
-            page,
-            limit,
             total: newsCache.length,
-            totalPages: Math.ceil(newsCache.length / limit),
             results: newsdata,
             lastUpdated: new Date(lastFetched).toISOString(),
             cached: Date.now() - lastFetched < CACHE_TTL
@@ -315,8 +309,8 @@ app.get('/portfolios', authenticateToken, async (req, res) => {
 mongoose_1.default
     .connect(url)
     .then(() => {
-    app.listen(5000, () => {
-        console.log('Server is running on port 5000');
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
         console.log('Connected to MongoDB successfully');
     });
 })

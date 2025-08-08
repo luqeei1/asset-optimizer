@@ -227,12 +227,11 @@ async def get_historical(data: HistoricalData):
 @app.get("/news")
 async def get_market_news():
     try:
-        date_7_days_ago = (datetime.now() - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
+        date_30_days_ago = (datetime.now() - pd.Timedelta(days=30)).strftime("%Y-%m-%d")
         all_articles = []
-        
-       
-        for page in range(1, 4): 
-            url = f"https://api.marketaux.com/v1/news/all?published_after={date_7_days_ago}T00:00&limit=25&page={page}&api_token={API_KEY}"
+
+        for page in range(1, 6):
+            url = f"https://api.marketaux.com/v1/news/all?published_after={date_30_days_ago}T00:00&language=en&page={page}&limit=25&api_token={API_KEY}"
             response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
             
             if response.status_code == 200:
