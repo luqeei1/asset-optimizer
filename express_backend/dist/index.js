@@ -21,7 +21,7 @@ let newsCache = null;
 let lastFetched = 0;
 const CACHE_TTL = 1000 * 60 * 20; // 20 minutes
 const JWT_SECRET = process.env.JWT_SECRET;
-const FastAPI_URL = "http://localhost:8000";
+const FastAPI_URL = "https://asset-optimizer.onrender.com";
 const url = process.env.MONGO_URL || " ";
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
@@ -94,9 +94,6 @@ function authenticateToken(req, res, next) {
         next();
     });
 }
-app.get('/portfolio', authenticateToken, async (req, res) => {
-    res.json({ message: 'Welcome ' + req.user.username });
-});
 app.post('/optimize', async (req, res) => {
     const { assets, window_days, constraints } = req.body;
     console.log('Received from frontend:', req.body);
@@ -249,33 +246,6 @@ app.post('/historical', async (req, res) => {
         if (error.response?.data) {
             res.status(error.response.status || 500).json({
                 error: error.response.data.detail || 'Historical data fetch failed',
-                details: error.response.data
-            });
-        }
-        else {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    }
-});
-app.get('/market_snapshot', async (req, res) => {
-    try {
-        const fastAPIUrl = `${FastAPI_URL}/market_snapshot`;
-        const response = await axios_1.default.get(fastAPIUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-        });
-        if (response.data) {
-            res.status(200).json(response.data);
-        }
-        else {
-            res.status(404).json({ error: 'Market snapshot not found' });
-        }
-    }
-    catch (error) {
-        console.error('Error fetching market snapshot:', error.message);
-        console.error('FastAPI error:', error.response?.data);
-        if (error.response?.data) {
-            res.status(error.response.status || 500).json({
-                error: error.response.data.detail || 'Market snapshot fetch failed',
                 details: error.response.data
             });
         }

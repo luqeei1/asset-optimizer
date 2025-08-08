@@ -122,9 +122,6 @@ function authenticateToken(req: Request, res: Response, next: any): void {
     });
 }
 
-app.get('/portfolio', authenticateToken, async (req: Request, res: Response) => {
-    res.json({message: 'Welcome ' + req.user.username });
-})
 
 app.post('/optimize', async (req: Request, res: Response): Promise<void> => {
     const { assets, window_days, constraints } = req.body;
@@ -320,33 +317,7 @@ app.post('/historical', async (req: Request, res: Response): Promise<void> => {
     }
 });
 
-app.get('/market_snapshot', async (req: Request, res: Response): Promise<void> => {
-    try {
-        const fastAPIUrl = `${FastAPI_URL}/market_snapshot`;
-        const response = await axios.get(fastAPIUrl, { 
-            headers: { 'User-Agent': 'Mozilla/5.0' } 
-        });
 
-        if (response.data) {
-            res.status(200).json(response.data);
-        } else {
-            res.status(404).json({ error: 'Market snapshot not found' });
-        }
-    }
-    catch (error: any) {
-        console.error('Error fetching market snapshot:', error.message);
-        console.error('FastAPI error:', error.response?.data);
-        
-        if (error.response?.data) {
-            res.status(error.response.status || 500).json({ 
-                error: error.response.data.detail || 'Market snapshot fetch failed',
-                details: error.response.data
-            });
-        } else {
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-    }
-});
 
 app.post('/save', authenticateToken, async (req: Request, res: Response) => {
     const portfolioData = req.body;

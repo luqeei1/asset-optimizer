@@ -349,6 +349,7 @@ const Main = () => {
 
   const resetPortfolio = () => {
     setAssets([]);
+    setId(null); 
     setWindowDays(252);
     setFoundSymbol(null);
     setMinAssetWeight(0.05);
@@ -637,6 +638,7 @@ const Main = () => {
                     setShowPrevious(!showPrevious);
                     if (!showPrevious) {
                       setAssets(previousPortfolios[0]?.assets || []);
+                      setId(previousPortfolios[0]?._id || null);
                       setWindowDays(previousPortfolios[0]?.window_days || 252);
                       setFoundSymbol(null);
                       setMinAssetWeight(previousPortfolios[0]?.constraints.min_asset_weight || 0.05);
