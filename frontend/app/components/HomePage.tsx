@@ -121,7 +121,7 @@ const Register = ({ onSwitch }: { onSwitch: () => void }) => {
         return;
       }
 
-      router.push('/Start');
+      window.location.reload();
     } catch {
       setError('Network error');
     } finally {
@@ -231,10 +231,9 @@ const HomePage = () => {
           transition={{ duration: 1, delay: 1 }}
           className='text-xl font-medium text-white mb-4 max-w-3xl text-center mt-4'
         >
-          SharpeOpt is a full stack app that serves the purpose of optimizing a given portfolio of assets using the Sharpe Ratio.In addition, the calculated Sharpe Ratio can be seen for those
-          who wish to evaluate the performance of their investments. SharpeOpt provides other features such as viewing historical data of stocks, and reading the latest news articles related to the stock market.
-          SharpeOpt is written using NextJS, TypeScript and TailWindCSS on the frontend with ExpressJS, TypeScript on the backend. In addition, Python FastAPI
-          is used to act as a micro-service for mathematical calculations and minimization. To further understand the product of SharpeOpt, visit its codebase.
+          SharpeOpt is a multipurpose full stack app that serves the purpose of optimizing a given portfolio using Sharpe Ratio optimization. SharpeOpt provides other features such as viewing historical data of stocks, and finding the latest news related to the stock market.
+          SharpeOpt is written using NextJS, TypeScript and TailWindCSS on the frontend with ExpressJS, TypeScript on the backend with Python FastAPI
+          is used to act as a micro-service for mathematical calculations and minimization. MongoDB is used to store user data and historical stock data. To further understand SharpeOpt, visit its codebase.
         </motion.p>
       </div>
 
