@@ -19,6 +19,7 @@ import { CiSaveDown1 } from 'react-icons/ci';
 import { s } from 'motion/react-client';
 
 interface Portfolio {
+  _id?: string; 
   assets: string[];
   window_days: number;
   constraints: {
@@ -53,6 +54,7 @@ interface OptimizeRequest {
 
 const Main = () => {
   const [input, setInput] = useState('');
+  const [id, setId] = useState<string | null>(null);
   const [assets, setAssets] = useState<string[]>([]);
   const [windowDays, setWindowDays] = useState(252); 
   const [foundSymbol, setFoundSymbol] = useState<string | null>(null);
@@ -66,6 +68,10 @@ const Main = () => {
   const [showPrevious, setShowPrevious] = useState(false);
   const [nextPortfolioIndex, setNextPortfolioIndex] = useState(0);
   const [previousPortfolioIndex, setPreviousPortfolioIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deletionSuccess, setDeletionSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
   const router = useRouter();
@@ -149,6 +155,9 @@ const Main = () => {
       return;
     }
     
+    setIsSaving(true);
+    setSaveSuccess(false);
+    
     try {
       const response = await fetch(`${expressBackendUrl}/save`, {
         method: 'POST',
@@ -166,11 +175,77 @@ const Main = () => {
 
       const data = await response.json();
       console.log('Portfolio saved:', data);
+      setSaveSuccess(true);
+      
+      
+      await fetchPreviousPortfolios();
+      
+      
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 2000);
+      
     } catch (error) {
       console.error('Error saving portfolio:', error);
       setError(error instanceof Error ? error.message : 'Failed to save portfolio');
+    } finally {
+      setIsSaving(false);
     }
+  }
 
+  const deletePortfolio = async (portfolioId: string) => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      console.log('You must be logged in to delete a portfolio');
+      return;
+    }
+    
+    setIsDeleting(true);
+    setDeletionSuccess(false);
+    
+    try {
+      const response = await fetch(`${expressBackendUrl}/delete/${portfolioId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete portfolio');
+      }
+
+      console.log('Portfolio deleted successfully');
+      setDeletionSuccess(true);
+      
+      
+      await fetchPreviousPortfolios();
+      
+      
+      if (previousPortfolios.length > 1) {
+        const firstPortfolio = previousPortfolios[1];
+        setAssets(firstPortfolio?.assets || []);
+        setWindowDays(firstPortfolio?.window_days || 252);
+        setMinAssetWeight(firstPortfolio?.constraints.min_asset_weight || 0.05);
+        setMaxAssetWeight(firstPortfolio?.constraints.max_asset_weight || 0.75);
+        setRiskFreeRate(firstPortfolio?.constraints.risk_free_rate || undefined);
+      } else {
+        resetPortfolio();
+        setShowPrevious(false);
+      }
+      
+      
+      setTimeout(() => {
+        setDeletionSuccess(false);
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error deleting portfolio:', error);
+      setError(error instanceof Error ? error.message : 'Failed to delete portfolio');
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   const optimizePortfolio = async () => {
@@ -239,6 +314,7 @@ const Main = () => {
 
   const nextPortfolio = () => {
     setAssets(previousPortfolios[nextPortfolioIndex]?.assets || []);
+    setId(previousPortfolios[nextPortfolioIndex]?._id || null);
     setWindowDays(previousPortfolios[nextPortfolioIndex]?.window_days || 252);
     setFoundSymbol(null);
     setMinAssetWeight(previousPortfolios[nextPortfolioIndex]?.constraints.min_asset_weight || 0.05);
@@ -255,6 +331,7 @@ const Main = () => {
   }
   const prevPortfolio = () => {
     setAssets(previousPortfolios[previousPortfolioIndex]?.assets || []);
+    setId(previousPortfolios[previousPortfolioIndex]?._id || null);
     setWindowDays(previousPortfolios[previousPortfolioIndex]?.window_days || 252);
     setFoundSymbol(null);
     setMinAssetWeight(previousPortfolios[previousPortfolioIndex]?.constraints.min_asset_weight || 0.05);
@@ -525,11 +602,32 @@ const Main = () => {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => {savetoMongoDB()}}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+                  onClick={savetoMongoDB}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                    saveSuccess 
+                      ? 'bg-green-500 text-white cursor-default'
+                      : isSaving
+                      ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                      : 'bg-gray-800 hover:bg-gray-700 text-white'
+                  }`}
+                  disabled={isSaving || saveSuccess}
                 >
-                  <CiSaveDown1 className="h-5 w-5" />
-                  Save Portfolio
+                  {saveSuccess ? (
+                    <>
+                      <FiCheck className="h-5 w-5" />
+                      Saved
+                    </>
+                  ) : isSaving ? (
+                    <>
+                      <FiRefreshCw className="animate-spin h-5 w-5" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <CiSaveDown1 className="h-5 w-5" />
+                      Save Portfolio
+                    </>
+                  )}
                 </motion.button>
 
                 <motion.button
@@ -573,6 +671,46 @@ const Main = () => {
                     </div>
                   </div>
                 )}
+
+                { showPrevious && 
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+                      deletionSuccess 
+                        ? 'bg-green-500 text-white cursor-default'
+                        : isDeleting
+                        ? 'bg-gray-600 text-gray-300 cursor-not-allowed'
+                        : 'bg-red-500 hover:bg-red-600 text-white'
+                    }`}
+                    onClick={() => {
+                      if (!isDeleting && !deletionSuccess) {
+                        const d_id = id;
+                        if (d_id) {
+                          deletePortfolio(d_id);
+                        }
+                      }
+                    }}
+                    disabled={isDeleting || deletionSuccess}
+                  >
+                    {deletionSuccess ? (
+                      <>
+                        <FiCheck className="h-5 w-5" />
+                        Deleted
+                      </>
+                    ) : isDeleting ? (
+                      <>
+                        <FiRefreshCw className="animate-spin h-5 w-5" />
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <FiX className="h-5 w-5" />
+                        Delete Portfolio
+                      </>
+                    )}
+                  </motion.button>
+                }
               </div>
 
               {assets.length > 0 && (

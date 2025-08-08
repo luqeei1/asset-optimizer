@@ -189,6 +189,31 @@ app.post('/find', async (req, res) => {
         }
     }
 });
+app.delete('/delete/:portfolioId', authenticateToken, async (req, res) => {
+    const { portfolioId } = req.params;
+    if (!portfolioId) {
+        res.status(400).json({ error: 'Portfolio ID is required' });
+        return;
+    }
+    try {
+        const deletedPortfolio = await PortfolioModel_1.default.findOneAndDelete({
+            _id: portfolioId,
+            username: req.user.username
+        });
+        if (!deletedPortfolio) {
+            res.status(404).json({ error: 'Portfolio not found or you do not have permission to delete it' });
+            return;
+        }
+        res.status(200).json({
+            message: 'Portfolio deleted successfully',
+            deletedPortfolio: deletedPortfolio
+        });
+    }
+    catch (error) {
+        console.error('Error deleting portfolio:', error.message);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 app.get('/news', async (req, res) => {
     try {
         if (!newsCache || Date.now() - lastFetched > CACHE_TTL) {
