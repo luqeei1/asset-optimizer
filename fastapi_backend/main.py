@@ -231,7 +231,7 @@ async def get_market_news():
         all_articles = []
 
         for page in range(1, 6):
-            url = f"https://api.marketaux.com/v1/news/all?published_after={date_30_days_ago}T00:00&language=en&categories=market,economy,investment,banking,technology&page={page}&limit=25&api_token={API_KEY}"
+            url = f"https://api.marketaux.com/v1/news/all?published_after={date_30_days_ago}T00:00&language=en&industries=Financial,Financial+Services,Energy,Communication+Services,Consumer+Cyclical,Utilities,Industrials&page={page}&limit=25&api_token={API_KEY}"
             response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
             
             if response.status_code == 200:
