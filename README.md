@@ -1,4 +1,4 @@
-# 📈 Welcome To SharpeOpt - A Portfolio Optimizer Based Around The Sharpe Ratio
+# 📈 Welcome To SharpeOpt - A Portfolio Optimizer Based On The Sharpe Ratio
 
 Welcome to my full-stack portfolio optimization application, SharpeOpt!  
 This project leverages the **Sharpe ratio** to help users optimize their investment portfolios. It also includes:
