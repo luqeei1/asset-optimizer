@@ -13,7 +13,7 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 
 ### 💰 What is Sharpe Ratio optimization? 
 
-The Sharpe Ratio optimization is a portfolio optimization technique where one has a portfolio of stocks and the fundamental question of "How much money should I allocate to each stock in my portfolio". The Sharpe Ratio optimization answers just this; it takes a set of stocks, a window (days to look within history, normally 252 trading days) and constraints on maximum weighted risk and minimum weighted risk. Firstly, we will define two key terms:
+The Sharpe Ratio optimization is a portfolio optimization technique where one has a portfolio of stocks/cryptocurrencies and the fundamental question of "How much money should I allocate to each stock/cryptocurrency in my portfolio". The Sharpe Ratio optimization answers just this; it takes a set of stocks/cryptocurrencies, a window (days to look within history, normally 252 trading days) and constraints on maximum weighted risk and minimum weighted risk. Firstly, we will define two key terms:
 
 Risk : How much does price fluctuate (measured by volatility which is the standard devitiation of return)
 
