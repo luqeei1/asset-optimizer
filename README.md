@@ -7,7 +7,7 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 - ⏰ A **stock opening/closing time comparator**  
 - 💼 A **portfolio optimizer** using the Sharpe ratio
 
-**NOTE**: SharpeOpt has now been deployed and complete! Check out SharpeOpt at using the Vercel link!!!!! Please note that it may take up to 50 seconds at least for login due to the backends needing to restart on render.
+**NOTE**: SharpeOpt has now been deployed and complete! Check out SharpeOpt at using the Vercel link!!!!! Please note that it may take up to 50 seconds at least for login due to the backends needing to restart on render. ALso note that if you are testing a portfolio of cryptocurrencies, please specify the name of each asset as 'cryptocurrency + USD' (e.g. Ethereum USD) to ensure pricing is retrieved in USD. 
 
 ---
 
