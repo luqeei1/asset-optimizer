@@ -7,13 +7,13 @@ This project leverages the **Sharpe ratio** to help users optimize their investm
 - ⏰ A **stock opening/closing time comparator**  
 - 💼 A **portfolio optimizer** using the Sharpe ratio
 
-**NOTE**: SharpeOpt has now been deployed and complete! Check out SharpeOpt at using the Vercel link!!!!! Please note that it may take up to 50 seconds at least for login due to the backends needing to restart on render.
+**NOTE**: SharpeOpt has now been deployed and complete! Check out SharpeOpt at using the Vercel link!!!!! Please note that it may take up to 50 seconds at least for login due to the backends needing to restart on render. ALso note that if you are testing a portfolio of cryptocurrencies, please specify the name of each asset as 'cryptocurrency + USD' (e.g. Ethereum USD) to ensure pricing is retrieved in USD. If ‘NaN’ appears in the Window (days) input, press Ctrl + A and then Backspace to clear it.
 
 ---
 
 ### 💰 What is Sharpe Ratio optimization? 
 
-The Sharpe Ratio optimization is a portfolio optimization technique where one has a portfolio of stocks and the fundamental question of "How much money should I allocate to each stock in my portfolio". The Sharpe Ratio optimization answers just this; it takes a set of stocks, a window (days to look within history, normally 252 trading days) and constraints on maximum weighted risk and minimum weighted risk. Firstly, we will define two key terms:
+The Sharpe Ratio optimization is a portfolio optimization technique where one has a portfolio of assets (tested with stocks and cryptocurrencies) and the fundamental question of "How much money should I allocate to each asset in my portfolio". The Sharpe Ratio optimization answers just this; it takes a set of assets, a window (days to look within history, normally 252 trading days) and constraints on maximum weighted risk and minimum weighted risk. Firstly, we will define two key terms:
 
 Risk : How much does price fluctuate (measured by volatility which is the standard devitiation of return)
 
