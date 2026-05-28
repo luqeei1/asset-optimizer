@@ -272,7 +272,7 @@ app.get('/news', async (req: Request, res: Response): Promise<void> => {
         console.error('News fetch error:', error.message);
         console.error('Axios error data:', error.response?.data);
         console.error('Axios status code:', error.response?.status);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(502).json({ error: 'Failed to fetch news' });
     }
 });
 
@@ -312,7 +312,7 @@ app.post('/historical', async (req: Request, res: Response): Promise<void> => {
                 details: error.response.data
             });
         } else {
-            res.status(500).json({ error: 'Internal Server Error' });
+            res.status(502).json({ error: 'Failed to fetch historical data' });
         }
     }
 });

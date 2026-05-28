@@ -203,17 +203,35 @@ async def optimize_portfolio(portfolio: PortfolioInput):
 
     except Exception as e:
         logging.error(f"Optimization error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/find")
-async def find_symbol(request: FindRequest):  
+async def find_symbol(request: FindRequest):
     try:
         url = f"https://query1.finance.yahoo.com/v1/finance/search?q={request.name}"
         response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
         data = response.json()
-        return {"symbol": data['quotes'][0]['symbol']}
+
+        quotes = data.get("quotes", [])
+
+        if not quotes:
+            raise HTTPException(status_code=404, detail="No matching symbol found")
+
+        symbol = quotes[0].get("symbol")
+
+        if not symbol:
+            raise HTTPException(status_code=404, detail="Symbol not found in response")
+
+        return {"symbol": symbol}
+
+    except HTTPException:
+        raise
+
+    except requests.exceptions.RequestException:
+        raise HTTPException(status_code=502, detail="Failed to reach Yahoo Finance API")
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Symbol lookup failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 @app.post("/historical")
 async def get_historical(data: HistoricalData):
@@ -221,9 +239,14 @@ async def get_historical(data: HistoricalData):
         ticker = Ticker(data.symbol)
         hist = ticker.history(start=data.start, end=data.end, interval=data.step)
         return hist.reset_index().to_dict(orient="records")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid symbol or date range")
 
+
+    except Exception as e:
+        logging.error(f"Historical fetch error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to fetch historical data")
+    
 @app.get("/news")
 async def get_market_news():
     try:
@@ -247,10 +270,13 @@ async def get_market_news():
         
         print(f"Total fetched articles: {len(all_articles)}")
         return all_articles
+
+    except requests.RequestException:
+        raise HTTPException(status_code=502, detail="External API failed")
         
     except Exception as e:
         logging.error(f"News fetch error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to fetch news")
 
 
 @app.get("/")
