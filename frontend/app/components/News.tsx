@@ -18,7 +18,7 @@ const News = () => {
   const [allArticles, setAllArticles] = useState<Article[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com'
+  const expressBackendUrl = 'http://localhost:5000'
   const articlesPerPage = 3
   const router = useRouter()
 

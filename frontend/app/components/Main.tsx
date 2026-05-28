@@ -72,7 +72,7 @@ const Main = () => {
   const [deletionSuccess, setDeletionSuccess] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
+  const expressBackendUrl = 'http://localhost:5000';
 
   const router = useRouter();
 

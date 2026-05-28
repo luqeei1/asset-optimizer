@@ -11,7 +11,7 @@ const Login = ({ onSwitch }: { onSwitch: () => void }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
+  const expressBackendUrl = 'http://localhost:5000';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
