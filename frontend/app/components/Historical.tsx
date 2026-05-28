@@ -30,7 +30,7 @@ const Historical = () => {
   const [error2, setError2] = useState<string | null>(null);
   const router = useRouter();
 
-  const expressBackendUrl = 'http://localhost:5000';
+  const expressBackendUrl = 'https://asset-optimizer-1.onrender.com';
 
    useEffect(() => {
     if (typeof window !== 'undefined') {
